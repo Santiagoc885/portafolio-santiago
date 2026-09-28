@@ -3,8 +3,13 @@ import { defineConfig, fontProviders } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 
-// [POR COMPLETAR] Dominio final. Se puede definir con la variable SITE_URL al desplegar.
-const site = process.env.SITE_URL ?? 'http://localhost:4321';
+// Dominio del sitio (canonical, hreflang, sitemap, robots.txt).
+// 1. SITE_URL si está definida (dominio propio).
+// 2. En Vercel, el dominio de producción que expone la plataforma.
+// 3. En local, localhost.
+const site =
+  process.env.SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'http://localhost:4321');
 
 export default defineConfig({
   site,

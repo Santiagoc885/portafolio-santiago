@@ -29,7 +29,7 @@ export const paths = {
 
 /** Devuelve la ruta equivalente en el otro idioma. */
 export const translatePath = (pathname: string, to: Lang): string => {
-  const p = pathname.replace(/\/$/, '').replace(/\.html$/, '') || '/';
+  const p = pathname.replace(/\.html$/, '').replace(/\/(index)?$/, '') || '/';
   const caseEs = p.match(/^\/casos\/([^/]+)$/);
   const caseEn = p.match(/^\/en\/cases\/([^/]+)$/);
   const slug = caseEs?.[1] ?? caseEn?.[1];

@@ -19,7 +19,8 @@ const { title, description = txt.description } = Astro.props;
 const year = new Date().getFullYear();
 
 const fullTitle = title ? `${title} · ${profile.shortName}` : `${profile.shortName} · ${txt.title}`;
-const path = Astro.url.pathname.replace(/\/$/, '').replace(/\.html$/, '') || '/';
+// Ruta limpia: sin barra final, sin .html y sin /index (el build genera archivos .html planos).
+const path = Astro.url.pathname.replace(/\.html$/, '').replace(/\/(index)?$/, '') || '/';
 const canonical = new URL(path, Astro.site);
 const alternates = (Object.keys(languages) as Lang[]).map((l) => ({
   lang: l,
