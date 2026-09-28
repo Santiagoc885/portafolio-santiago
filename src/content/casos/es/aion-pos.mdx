@@ -1,0 +1,103 @@
+---
+title: AION POS
+mapLabel: AION POS
+summary: "Sistema POS multi-tenant para restaurantes y cafeterías: roles, reservas por QR o link, menú, pedidos, stock, facturación y recomendaciones con IA."
+role: Product Owner y desarrollador
+period: "2026"
+tools: [Next.js, React, TypeScript, Prisma, PostgreSQL, IA]
+type: training
+typeLabel: Colaborativo / Formación
+category: Full Stack + Business
+order: 5
+connects: [proyectos]
+areas: [software, ai]
+map: { column: 1, row: 10, width: 3, height: 1 }
+---
+
+## Contexto
+
+Proyecto colaborativo de Riwi (2026): un sistema POS para restaurantes y cafeterías, construido como MVP funcional.
+
+## Problema
+
+Un restaurante o una cafetería necesita gestionar menú, pedidos, reservas, clientes y administración. El objetivo era hacerlo desde una sola plataforma.
+
+## Mi responsabilidad
+
+Fui **Product Owner** del equipo Scrum: definí, prioricé y di seguimiento a las funcionalidades. También participé en el desarrollo técnico, especialmente en:
+
+- Reservas.
+- Gestión de pedidos.
+- Usuarios.
+- Estructura multi-tenant.
+
+## Análisis
+
+El alcance se definió a partir de las necesidades del negocio y se dividió en módulos. Las tareas se escribieron como historias de usuario y se priorizaron por sprint, con foco en lo necesario para un MVP funcional.
+
+<UserStory
+  as="cliente de un restaurante"
+  want="hacer una reserva desde un QR o un link"
+  so="reservar una mesa rápido sin tener que hacerlo en el establecimiento"
+  criteria={[
+    {
+      given: 'que abro el QR o el link de un restaurante',
+      when: 'completo la reserva',
+      then: 'la reserva queda registrada solo para ese restaurante',
+    },
+  ]}
+/>
+
+## Solución
+
+Módulos del sistema:
+
+- Autenticación y roles.
+- Staff y administración.
+- Clientes.
+- Reservas mediante QR o link.
+- Menú.
+- Pedidos y delivery.
+- Stock.
+- Facturación.
+- Recomendaciones asistidas por IA.
+
+## Arquitectura
+
+<ArchitectureDiagram
+  title="AION POS"
+  layers={[
+    { label: 'Aplicación', nodes: ['Next.js + React (TypeScript)'] },
+    { label: 'Acceso a datos', nodes: ['Prisma'] },
+    { label: 'Datos', nodes: ['PostgreSQL'] },
+  ]}
+  edges={[
+    ['Next.js + React (TypeScript)', 'Prisma'],
+    ['Prisma', 'PostgreSQL'],
+  ]}
+  crossCutting={[
+    { label: 'Multi-tenant', nodes: ['Datos por negocio'] },
+    { label: 'IA', nodes: ['Recomendaciones'] },
+  ]}
+/>
+
+## Implementación
+
+- **Multi-tenant:** cada registro se asocia con su negocio, para mantener separados los datos de cada restaurante.
+- **Recomendaciones con IA:** usan la información del menú y las preferencias o el contexto del pedido para sugerir platos de la oferta disponible en cada negocio.
+
+## Validación
+
+Se probaron los flujos del sistema, en especial autenticación, reservas, pedidos y la separación de información entre negocios. El equipo hizo además revisiones durante los sprints.
+
+## Resultado
+
+Un MVP funcional con los módulos principales del POS.
+
+No hay una métrica de producción de mejora o adopción, así que no se reporta ninguna cifra.
+
+## Aprendizajes
+
+Aprendí a combinar la perspectiva técnica con la definición y priorización de funcionalidades desde el rol de Product Owner, y reforcé la arquitectura multi-tenant en aplicaciones orientadas a procesos reales de negocio.
+
+Hoy definiría desde el inicio los criterios de aceptación y las métricas de éxito, porque facilitan mucho la validación posterior del producto.

@@ -1,0 +1,349 @@
+---
+/** Página "Sobre mí" / "About", compartida por /sobre-mi y /en/about. */
+import Base from '../layouts/Base.astro';
+import Pending from '../components/Pending.astro';
+import { profile, getStack } from '../data/profile';
+import { getLang, paths, anchors } from '../i18n';
+
+const lang = getLang(Astro.currentLocale);
+const stack = getStack(lang);
+const caseUrl = (slug: string) => paths.case(lang, slug);
+
+const copy = {
+  es: {
+    meta: `${profile.name}: formación, evolución hacia software y datos, cómo aprendo y cómo uso IA.`,
+    title: 'Sobre mí',
+    heading: 'Software y datos, con el negocio en el centro',
+    lede: `Soy ${profile.name}. Vivo en ${profile.city}. Soy ingeniero de datos y software con ${profile.experienceYears} años de experiencia entre desarrollo backend, Business Intelligence y aplicaciones full stack.`,
+    education: 'Formación',
+    degree: 'Título: Ingeniero de Datos y Software (2025).',
+    uni: 'En la Universidad de San Buenaventura Medellín (2024 – 2026) participé en un proyecto de innovación universitaria como Software Developer, en un equipo de unas 10 personas bajo Scrum: Django, PostgreSQL, procedimientos almacenados, autenticación y control por roles.',
+    seeCase: 'Ver el caso',
+    riwi: 'En Riwi hice una formación intensiva orientada a desarrollo Full Stack y AI, con proyectos integradores y code reviews.',
+    pathTitle: 'Cómo llegué a software y datos',
+    pathIntro:
+      'Empecé en el backend, escribiendo lógica de negocio sobre bases de datos relacionales. Luego pasé al otro lado de los datos: en Grupo ISA / XM los usé para responder preguntas concretas sobre licencias de software, con Power BI y Python. Hoy combino ambas cosas con desarrollo full stack e integración de IA.',
+    path: [
+      { when: 'Sep 2022 – Jun 2023', what: 'Backend Developer en PHC Servicios Integrados', detail: 'Python, Django, bases de datos relacionales y APIs.' },
+      { when: 'Jul 2023 – Ene 2024', what: 'SAM / BI Intern en Grupo ISA / XM', detail: 'Power BI, análisis con Python y reportes automatizados.' },
+      { when: '2024 – 2026', what: 'Software Developer en un proyecto de la Universidad de San Buenaventura Medellín', detail: 'Django, PostgreSQL, autenticación y control de acceso por roles.' },
+      { when: '2026 – Actualidad', what: 'Full Stack Developer en Riwi', detail: 'TypeScript, React, Next.js, proyectos integradores y AI.' },
+    ],
+    riwiPeriod: 'periodo en Riwi',
+    motivation:
+      'Me llevó el interés por entender cómo la tecnología resuelve problemas reales y convierte datos en información útil para tomar mejores decisiones. Con el tiempo descubrí que el software y los datos me permiten combinar el pensamiento lógico con la construcción de soluciones prácticas.',
+    problemsTitle: 'Problemas que me interesan',
+    problems: [
+      'Convertir datos operativos en información que sirva para decidir, como en el análisis de licencias de software.',
+      'Sistemas para operaciones de negocio con varios clientes y roles, como AION POS.',
+      'Aprendizaje y onboarding apoyados en IA sobre contenido propio, como FORGE.',
+      'Medir procesos y no solo resultados, como en Riwlog.',
+    ],
+    learnTitle: 'Cómo aprendo',
+    learn:
+      'Construyendo proyectos completos en equipo y sometiendo el código a revisión. Los proyectos de formación me llevaron a trabajar con Next.js y Prisma (AION POS), RAG y bases de datos vectoriales (FORGE) y servicios de Azure con Bicep (Centinela).',
+    habits: 'Me mantengo al día con cursos y proyectos propios.',
+    aiTitle: 'Cómo uso IA',
+    aiIntro:
+      'Uso herramientas basadas en LLMs como apoyo, no como reemplazo del criterio técnico. La responsabilidad sobre el código sigue siendo mía: lo leo, lo entiendo, lo pruebo y lo reviso antes de integrarlo.',
+    aiToolTitle: 'Como herramienta de trabajo',
+    aiUses: [
+      { k: 'Investigación técnica', v: 'Explorar documentación, comparar enfoques y ubicar conceptos antes de decidir.' },
+      { k: 'Generación y revisión de código', v: 'Borradores y revisión de código que luego leo, pruebo y ajusto.' },
+      { k: 'Debugging', v: 'Formular hipótesis sobre un error a partir de trazas y contexto.' },
+      { k: 'Documentación', v: 'Redactar y ordenar documentación técnica.' },
+      { k: 'Análisis', v: 'Apoyo para estructurar el análisis de información.' },
+      { k: 'Diseño de soluciones', v: 'Discutir alternativas de arquitectura y sus costos.' },
+      { k: 'Prompts', v: 'Diseñar prompts como parte de funcionalidades de producto.' },
+    ],
+    aiProductsTitle: 'Dentro de productos',
+    aiProductsIntro: 'Integro IA en aplicaciones cuando resuelve una parte concreta del problema:',
+    aiProducts: [
+      { project: 'FORGE', slug: 'forge', what: 'NOVA, un asistente basado en RAG sobre documentos y manuales de la plataforma.' },
+      { project: 'Riwlog / Riwlogic', slug: 'riwlog', what: 'Clasificación con IA de patrones en los eventos del proceso de resolución.' },
+      { project: 'AION POS', slug: 'aion-pos', what: 'Recomendaciones asistidas por IA dentro de un sistema POS.' },
+    ],
+    limitsTitle: 'Límites que aplico',
+    limits: [
+      'No integro código generado que no entiendo.',
+      'Verifico versiones y APIs contra la documentación oficial.',
+      'Las respuestas de un sistema RAG deben apoyarse en los documentos cargados, no en suposiciones del modelo.',
+    ],
+    toolsTitle: 'Herramientas',
+    projectsTitle: 'Proyectos relevantes',
+    projectsBefore: 'El detalle de cada proyecto, separado entre experiencia profesional, académica, personal y de formación, está en',
+    projectsLink: 'el índice de casos',
+  },
+  en: {
+    meta: `${profile.name}: education, path into software and data, how I learn and how I use AI.`,
+    title: 'About',
+    heading: 'Software and data, with the business at the center',
+    lede: `I’m ${profile.name}. I live in ${profile.city}. I’m a data and software engineer with ${profile.experienceYears} years of experience across backend development, Business Intelligence and full stack applications.`,
+    education: 'Education',
+    degree: 'Degree: Data and Software Engineer (2025).',
+    uni: 'At Universidad de San Buenaventura Medellín (2024 – 2026) I took part in a university innovation project as a Software Developer, in a team of about 10 people under Scrum: Django, PostgreSQL, stored procedures, authentication and role-based access.',
+    seeCase: 'See the case',
+    riwi: 'At Riwi I completed an intensive training program focused on Full Stack development and AI, with capstone projects and code reviews.',
+    pathTitle: 'How I got into software and data',
+    pathIntro:
+      'I started in the backend, writing business logic on top of relational databases. Then I moved to the other side of data: at Grupo ISA / XM I used it to answer concrete questions about software licenses, with Power BI and Python. Today I combine both with full stack development and AI integration.',
+    path: [
+      { when: 'Sep 2022 – Jun 2023', what: 'Backend Developer at PHC Servicios Integrados', detail: 'Python, Django, relational databases and APIs.' },
+      { when: 'Jul 2023 – Jan 2024', what: 'SAM / BI Intern at Grupo ISA / XM', detail: 'Power BI, analysis with Python and automated reports.' },
+      { when: '2024 – 2026', what: 'Software Developer on a Universidad de San Buenaventura Medellín project', detail: 'Django, PostgreSQL, authentication and role-based access control.' },
+      { when: '2026 – Present', what: 'Full Stack Developer at Riwi', detail: 'TypeScript, React, Next.js, capstone projects and AI.' },
+    ],
+    riwiPeriod: 'period at Riwi',
+    motivation:
+      'I was drawn by wanting to understand how technology solves real problems and turns data into useful information for better decisions. Over time I found that software and data let me combine logical thinking with building practical solutions.',
+    problemsTitle: 'Problems I care about',
+    problems: [
+      'Turning operational data into information that supports decisions, as in the software license analysis.',
+      'Systems for business operations with multiple clients and roles, like AION POS.',
+      'AI-supported learning and onboarding over an organization’s own content, like FORGE.',
+      'Measuring processes, not only results, as in Riwlog.',
+    ],
+    learnTitle: 'How I learn',
+    learn:
+      'By building complete projects in teams and putting my code up for review. Training projects led me to work with Next.js and Prisma (AION POS), RAG and vector databases (FORGE) and Azure services with Bicep (Centinela).',
+    habits: 'I keep up to date through courses and personal projects.',
+    aiTitle: 'How I use AI',
+    aiIntro:
+      'I use LLM-based tools as support, not as a replacement for technical judgment. I remain responsible for the code: I read it, understand it, test it and review it before integrating it.',
+    aiToolTitle: 'As a work tool',
+    aiUses: [
+      { k: 'Technical research', v: 'Exploring documentation, comparing approaches and locating concepts before deciding.' },
+      { k: 'Code generation and review', v: 'Drafts and code reviews that I then read, test and adjust.' },
+      { k: 'Debugging', v: 'Forming hypotheses about an error from traces and context.' },
+      { k: 'Documentation', v: 'Writing and organizing technical documentation.' },
+      { k: 'Analysis', v: 'Support to structure information analysis.' },
+      { k: 'Solution design', v: 'Discussing architecture alternatives and their costs.' },
+      { k: 'Prompts', v: 'Designing prompts as part of product features.' },
+    ],
+    aiProductsTitle: 'Inside products',
+    aiProductsIntro: 'I integrate AI into applications when it solves a concrete part of the problem:',
+    aiProducts: [
+      { project: 'FORGE', slug: 'forge', what: 'NOVA, a RAG-based assistant over the platform’s documents and manuals.' },
+      { project: 'Riwlog / Riwlogic', slug: 'riwlog', what: 'AI classification of patterns in the events of the solving process.' },
+      { project: 'AION POS', slug: 'aion-pos', what: 'AI-assisted recommendations inside a POS system.' },
+    ],
+    limitsTitle: 'Limits I apply',
+    limits: [
+      'I do not integrate generated code I do not understand.',
+      'I check versions and APIs against the official documentation.',
+      'Answers from a RAG system must be grounded in the uploaded documents, not in the model’s assumptions.',
+    ],
+    toolsTitle: 'Tools',
+    projectsTitle: 'Relevant projects',
+    projectsBefore: 'Details for each project, separated into professional, academic, personal and training work, are in',
+    projectsLink: 'the case index',
+  },
+};
+const c = copy[lang];
+---
+
+<Base title={c.title} description={c.meta}>
+  <article class="about wrap">
+    <header class="head">
+      <p class="label">{c.title}</p>
+      <h1>{c.heading}</h1>
+      <p class="lede">{c.lede}</p>
+    </header>
+
+    <section class="block" aria-labelledby="formacion">
+      <h2 id="formacion">{c.education}</h2>
+      <div class="body">
+        <p>{c.degree}</p>
+        <p>{c.uni} <a href={caseUrl('innovacion-universitaria')}>{c.seeCase}</a>.</p>
+        <p>{c.riwi}</p>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="evolucion">
+      <h2 id="evolucion">{c.pathTitle}</h2>
+      <div class="body">
+        <p>{c.pathIntro}</p>
+        <ol class="path" role="list">
+          {
+            c.path.map((p) => (
+              <li>
+                <span class="when">{p.when ?? <Pending what={c.riwiPeriod} />}</span>
+                <span class="what">{p.what}</span>
+                <span class="muted">{p.detail}</span>
+              </li>
+            ))
+          }
+        </ol>
+        <p>{c.motivation}</p>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="problemas">
+      <h2 id="problemas">{c.problemsTitle}</h2>
+      <div class="body">
+        <ul class="plain">{c.problems.map((p) => <li>{p}</li>)}</ul>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="aprendo">
+      <h2 id="aprendo">{c.learnTitle}</h2>
+      <div class="body">
+        <p>{c.learn}</p>
+        <p>{c.habits}</p>
+      </div>
+    </section>
+
+    <section id={anchors[lang].ai} class="block" aria-labelledby="ia-titulo">
+      <h2 id="ia-titulo">{c.aiTitle}</h2>
+      <div class="body">
+        <p>{c.aiIntro}</p>
+
+        <h3>{c.aiToolTitle}</h3>
+        <dl class="uses">
+          {
+            c.aiUses.map((u) => (
+              <div>
+                <dt>{u.k}</dt>
+                <dd>{u.v}</dd>
+              </div>
+            ))
+          }
+        </dl>
+
+        <h3>{c.aiProductsTitle}</h3>
+        <p>{c.aiProductsIntro}</p>
+        <ul class="products" role="list">
+          {
+            c.aiProducts.map((a) => (
+              <li>
+                <a href={caseUrl(a.slug)}>{a.project}</a>
+                <span>{a.what}</span>
+              </li>
+            ))
+          }
+        </ul>
+
+        <h3>{c.limitsTitle}</h3>
+        <ul class="plain">{c.limits.map((l) => <li>{l}</li>)}</ul>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="herramientas">
+      <h2 id="herramientas">{c.toolsTitle}</h2>
+      <div class="body">
+        <dl class="tools">
+          {
+            stack.map((g) => (
+              <div>
+                <dt>{g.label}</dt>
+                <dd>{g.items.join(', ')}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="proyectos">
+      <h2 id="proyectos">{c.projectsTitle}</h2>
+      <div class="body">
+        <p>
+          {c.projectsBefore} <a href={paths.section(lang, 'cases')}>{c.projectsLink}</a>.
+        </p>
+      </div>
+    </section>
+  </article>
+</Base>
+
+<style>
+  .about {
+    padding-block: var(--space-6) var(--space-7);
+  }
+  .head {
+    display: grid;
+    gap: var(--space-3);
+    padding-bottom: var(--space-6);
+  }
+  h1 {
+    max-width: 18ch;
+    font-size: clamp(2.25rem, 6vw, 4rem);
+  }
+  .lede {
+    font-size: clamp(1.125rem, 2vw, 1.375rem);
+    line-height: 1.45;
+    max-width: 50ch;
+  }
+  .block {
+    display: grid;
+    gap: var(--space-3) var(--space-5);
+    padding-block: var(--space-5);
+    border-top: 1px solid var(--line);
+  }
+  .block h2 {
+    font-size: 1.5rem;
+  }
+  .body {
+    display: grid;
+    gap: var(--space-3);
+    max-width: 46rem;
+  }
+  .body h3 {
+    margin-top: var(--space-3);
+    font-size: 1.0625rem;
+  }
+  .path,
+  .products {
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--text);
+  }
+  .path li,
+  .products li {
+    display: grid;
+    gap: 0.125rem;
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--line);
+  }
+  .when {
+    font-size: 0.875rem;
+    font-weight: 560;
+    color: var(--text-2);
+  }
+  .what,
+  .products a {
+    font-weight: 640;
+  }
+  .plain {
+    display: grid;
+    gap: var(--space-2);
+    padding-left: 1.125rem;
+  }
+  .uses,
+  .tools {
+    display: grid;
+    border-top: 1px solid var(--text);
+  }
+  .uses div,
+  .tools div {
+    display: grid;
+    gap: 0.125rem var(--space-4);
+    padding-block: var(--space-2);
+    border-bottom: 1px solid var(--line);
+  }
+  dt {
+    font-weight: 620;
+  }
+  dd {
+    margin: 0;
+    color: var(--text-2);
+  }
+  @media (min-width: 48rem) {
+    .block {
+      grid-template-columns: 16rem 1fr;
+    }
+    .uses div,
+    .tools div {
+      grid-template-columns: 14rem 1fr;
+    }
+  }
+</style>

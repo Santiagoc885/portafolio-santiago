@@ -1,0 +1,13 @@
+---
+/** Marca visible de información faltante. `what` describe qué falta, para quien completa el contenido. */
+import { getLang, PENDING, useT } from '../i18n';
+
+interface Props {
+  what?: string;
+}
+const { what } = Astro.props;
+const lang = getLang(Astro.currentLocale);
+const t = useT(lang);
+---
+
+<span class="pending" title={what ? `${t.missing}: ${what}` : undefined}>{PENDING[lang]}{what && <span class="sr-only"> — {what}</span>}</span>

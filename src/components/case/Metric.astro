@@ -1,0 +1,96 @@
+---
+/**
+ * Métrica Antes → Después con mini gráfica SVG.
+ * Solo recibe datos reales. La gráfica se dibuja solo con valores numéricos en la misma unidad (before/after).
+ * Con beforeText/afterText muestra el dato tal como se reportó, sin gráfica.
+ * Si falta alguno, muestra [POR COMPLETAR].
+ */
+import Pending from '../Pending.astro';
+import { getLang, useT } from '../../i18n';
+
+interface Props {
+  label: string;
+  before?: number;
+  after?: number;
+  beforeText?: string;
+  afterText?: string;
+  unit?: string;
+  source?: string;
+}
+const { label, before, after, beforeText, afterText, unit = '', source } = Astro.props;
+const values = typeof before === 'number' && typeof after === 'number' ? { before, after } : null;
+const lang = getLang(Astro.currentLocale);
+const t = useT(lang);
+const W = 240;
+const max = values ? Math.max(values.before, values.after, 1) : 1;
+const fmt = (n: number) => `${n.toLocaleString(lang === 'es' ? 'es-CO' : 'en-US')}${unit ? ` ${unit}` : ''}`;
+---
+
+<figure class="metric">
+  <figcaption class="label">{label}</figcaption>
+  <div class="values">
+    <div>
+      <span class="muted">{t.before}</span>
+      <strong>{values ? fmt(values.before) : (beforeText ?? <Pending what={`${label} (${t.before})`} />)}</strong>
+    </div>
+    <span aria-hidden="true" class="arrow">→</span>
+    <div>
+      <span class="muted">{t.after}</span>
+      <strong>{values ? fmt(values.after) : (afterText ?? <Pending what={`${label} (${t.after})`} />)}</strong>
+    </div>
+  </div>
+  {
+    values && (
+      <svg viewBox={`0 0 ${W} 40`} role="img" aria-label={`${label}: ${t.before} ${fmt(values.before)}, ${t.after} ${fmt(values.after)}`}>
+        <rect class="bar-before" x="0" y="4" height="12" width={(values.before / max) * W} />
+        <rect class="bar-after" x="0" y="24" height="12" width={(values.after / max) * W} />
+      </svg>
+    )
+  }
+  {source && <p class="source muted">{t.source}: {source}</p>}
+</figure>
+
+<style>
+  .metric {
+    display: grid;
+    gap: var(--space-2);
+    margin: var(--space-4) 0;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--line-strong);
+    max-width: 32rem;
+  }
+  .values {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: var(--space-2) var(--space-4);
+  }
+  .values strong :global(.pending) {
+    font-size: 1rem;
+  }
+  .values div {
+    display: grid;
+  }
+  .values strong {
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-stretch: 92%;
+  }
+  .arrow {
+    padding-bottom: 0.25rem;
+    color: var(--text-2);
+  }
+  svg {
+    width: 100%;
+    height: auto;
+  }
+  .bar-before {
+    fill: var(--line-strong);
+  }
+  .bar-after {
+    fill: var(--text);
+  }
+  .source {
+    font-size: 0.8125rem;
+  }
+</style>

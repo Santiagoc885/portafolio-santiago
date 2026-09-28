@@ -1,0 +1,105 @@
+---
+title: FORGE
+mapLabel: FORGE
+summary: "SaaS multi-tenant para onboarding y capacitación de equipos operativos, con NOVA (asistente RAG) y ALAE (evaluación de accesibilidad e inclusión)."
+role: Full Stack Developer
+period: "2026"
+tools: [Next.js, React, TypeScript, Prisma, RAG, Embeddings, Bases de datos vectoriales, IA]
+type: training
+typeLabel: Colaborativo / Formación
+category: SaaS + AI + RAG
+order: 6
+connects: [proyectos]
+areas: [software, ai]
+map: { column: 5, row: 10, width: 4, height: 1 }
+---
+
+## Contexto
+
+Proyecto colaborativo de Riwi (2026): una plataforma SaaS multi-tenant para el onboarding y la capacitación de equipos operativos.
+
+## Problema
+
+Incorporar y capacitar a nuevos colaboradores es difícil cuando los materiales están repartidos en manuales, documentos y videos. FORGE busca que cada empresa centralice sus materiales de formación y ofrezca asistencia con IA.
+
+## Mi responsabilidad
+
+Participé como Full Stack Developer:
+
+- Funcionalidades de frontend y backend de la plataforma.
+- Integración del asistente de IA NOVA.
+- Gestión de documentos.
+- Estructura para soportar el sistema multi-tenant.
+
+## Análisis
+
+El alcance se dividió en módulos y funcionalidades mediante historias de usuario priorizadas por sprint. Primero se construyeron las funcionalidades principales de la plataforma y después las capacidades de IA, analítica y accesibilidad.
+
+<UserStory
+  as="persona nueva en un equipo operativo"
+  want="hacerle preguntas a NOVA sobre los manuales y documentos cargados"
+  so="encontrar rápido la información sobre los procesos de la empresa sin revisar a mano todos los documentos"
+  criteria={[
+    {
+      given: 'que la empresa cargó sus documentos de capacitación',
+      when: 'le hago una pregunta a NOVA',
+      then: 'la respuesta se apoya en fragmentos de esos documentos',
+    },
+  ]}
+/>
+
+## Solución
+
+- Gestión de contenido: carga de documentos, manuales y videos.
+- **NOVA**: asistente basado en RAG sobre los documentos de la empresa.
+- Analítica.
+- **ALAE**: componente de accesibilidad y sistema de evaluación de inclusión.
+
+## Arquitectura
+
+<ProcessMap
+  title="Cómo responde NOVA (RAG)"
+  lanes={['Documentos', 'Indexación', 'Búsqueda', 'LLM']}
+  steps={[
+    { lane: 'Documentos', label: 'Carga de manuales y documentos de capacitación' },
+    { lane: 'Indexación', label: 'Extracción y fragmentación del texto' },
+    { lane: 'Indexación', label: 'Embeddings y almacenamiento vectorial' },
+    { lane: 'Búsqueda', label: 'Búsqueda semántica de los fragmentos relevantes a la pregunta' },
+    { lane: 'LLM', label: 'Genera la respuesta usando esos fragmentos como contexto' },
+  ]}
+  note="Se describe el flujo de la arquitectura; no se detalla el proveedor del modelo ni de la base vectorial."
+/>
+
+<ArchitectureDiagram
+  title="FORGE"
+  layers={[
+    { label: 'Aplicación', nodes: ['Next.js + React (TypeScript)'] },
+    { label: 'Contenido', nodes: ['Documentos', 'Manuales', 'Videos'] },
+    { label: 'IA', nodes: ['NOVA (RAG)'] },
+    { label: 'Datos', nodes: ['Prisma', 'Base de datos vectorial'] },
+  ]}
+  crossCutting={[
+    { label: 'Accesibilidad', nodes: ['ALAE', 'Evaluación de inclusión'] },
+    { label: 'Producto', nodes: ['Multi-tenant', 'Analítica'] },
+  ]}
+/>
+
+## Implementación
+
+Los documentos de capacitación se procesan, se dividen en fragmentos y se convierten en embeddings para hacer búsqueda semántica. Ante una pregunta, se recuperan los fragmentos relevantes y se usan como contexto para que el modelo genere la respuesta.
+
+## Validación
+
+Se hicieron preguntas sobre los documentos cargados para verificar que NOVA recuperara información relacionada y que sus respuestas se apoyaran en el contenido disponible.
+
+## Resultado
+
+Una plataforma funcional con el asistente NOVA integrado.
+
+No se definió una métrica formal de precisión del sistema RAG, así que no se reporta un porcentaje de exactitud. Una versión más madura debería medir la relevancia de la recuperación, la precisión de las respuestas y los casos sin evidencia suficiente.
+
+## Aprendizajes
+
+Aprendí a integrar IA generativa en una aplicación real y cómo funciona un flujo RAG completo, desde la carga de documentos hasta la respuesta.
+
+Hoy trabajaría la evaluación desde el inicio, con un conjunto de preguntas y respuestas esperadas para medir objetivamente la calidad de la recuperación y de las respuestas.

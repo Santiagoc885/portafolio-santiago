@@ -1,0 +1,393 @@
+---
+/**
+ * Mapa principal: Experiencia / Datos — Software — AI / Proyectos.
+ * - Los nodos son enlaces HTML reales (orden de tabulación, foco visible, nombre accesible).
+ * - Las líneas son SVG decorativo (aria-hidden) en la misma retícula que los nodos.
+ * - Resaltado por hover/foco con CSS :has(), sin JavaScript.
+ * - En pantallas estrechas se muestra una miniatura no interactiva + la lista equivalente.
+ */
+import type { Case } from '../lib/cases';
+import { typeLabels } from '../data/profile';
+import { getLang, isPendingValue, paths, useT } from '../i18n';
+import { getHubs, hubLinks, hubBox, center, boxStyle, primaryAxis, VIEW_W, VIEW_H, CELL_W, CELL_H, type HubId } from '../data/map';
+
+interface Props {
+  cases: Case[];
+}
+const { cases } = Astro.props;
+const lang = getLang(Astro.currentLocale);
+const t = useT(lang);
+const hubList = getHubs(lang);
+
+/** Cada línea toma el color del eje al que llega (en los enlaces entre ejes, el que no es Software). */
+type Line = { d: string; ids: string; axis: HubId };
+const path = (a: { x: number; y: number }, b: { x: number; y: number }) => `M${a.x} ${a.y}L${b.x} ${b.y}`;
+
+const lines: Line[] = [
+  ...hubLinks.map(([a, b]) => ({
+    d: path(center(hubBox(a)), center(hubBox(b))),
+    ids: `${a} ${b}`,
+    axis: a === 'software' ? b : a,
+  })),
+  ...cases.flatMap((c) =>
+    c.data.connects.map((h) => ({ d: path(center(c.data.map), center(hubBox(h))), ids: `${c.slug} ${h}`, axis: h })),
+  ),
+];
+
+// Reglas de resaltado: al activar un nodo se resaltan sus líneas y los ejes a los que conecta.
+const ids = [...hubList.map((h) => h.id), ...cases.map((c) => c.slug)];
+const highlightCss = ids
+  .map((id) => {
+    const on = `.map-canvas:has([data-node='${id}']:is(:hover, :focus-visible))`;
+    const c = cases.find((c) => c.slug === id);
+    const relatedHubs = c ? [...new Set([...c.data.connects, ...c.data.areas])] : [];
+    const hubSel = relatedHubs.map((h) => `${on} [data-node='${h}']`).join(',');
+    return `${on} [data-line~='${id}']{stroke-width:3;opacity:1}${hubSel ? `${hubSel}{background:color-mix(in srgb,var(--axis) 16%,var(--bg))}` : ''}`;
+  })
+  .join('');
+
+const shortPeriod = (p: string) =>
+  p.replace(/(Enero|Febrero|Marzo|Abril|Mayo|Junio|Julio|Agosto|Septiembre|Octubre|Noviembre|Diciembre|January|February|March|April|May|June|July|August|September|October|November|December)\s/g, '');
+---
+
+<figure class="system-map" aria-labelledby="map-caption">
+  <figcaption id="map-caption" class="map-caption">
+    <span class="label">{t.mapCaption}</span>
+    <span class="muted">{t.mapHelp}</span>
+    <ul class="axis-chips legend" aria-label={t.mapLegend}>
+      {hubList.map((h) => <li class={`axis-${h.id}`}>{h.label}</li>)}
+    </ul>
+  </figcaption>
+
+  <!-- Versión interactiva (pantallas anchas) -->
+  <div class="map-canvas" style={`aspect-ratio:${VIEW_W}/${VIEW_H}`}>
+    <svg class="map-lines" viewBox={`0 0 ${VIEW_W} ${VIEW_H}`} aria-hidden="true" focusable="false">
+      <g class="grid">
+        {Array.from({ length: VIEW_W / CELL_W + 1 }, (_, i) => <path d={`M${i * CELL_W} 0V${VIEW_H}`} />)}
+        {Array.from({ length: VIEW_H / CELL_H + 1 }, (_, i) => <path d={`M0 ${i * CELL_H}H${VIEW_W}`} />)}
+      </g>
+      {lines.map((l, i) => <path class={`link axis-${l.axis}`} data-line={l.ids} d={l.d} pathLength="1" style={`--i:${i}`} />)}
+    </svg>
+
+    <ul class="map-nodes" role="list" aria-label={t.mapHubs}>
+      {
+        hubList.map((h) => (
+          <li class={`hub axis-${h.id}`} style={boxStyle(h.box)}>
+            <a href={h.href} data-node={h.id} aria-describedby={`hub-desc-${h.id}`}>
+              <span class="hub-name">{h.label}</span>
+            </a>
+            <p class="node-detail" id={`hub-desc-${h.id}`}>
+              {h.description}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+
+    <ul class="map-nodes" role="list" aria-label={t.mapCases}>
+      {
+        cases.map((c) => (
+          <li
+            class={`case axis-${primaryAxis(c.data.areas)} ${c.data.map.row > 5 ? 'detail-up' : ''} ${c.data.map.column > 8 ? 'detail-left' : ''}`}
+            style={boxStyle(c.data.map)}
+          >
+            <a href={paths.case(lang, c.slug)} data-node={c.slug} aria-describedby={`case-desc-${c.slug}`}>
+              <span class="case-name" style={`view-transition-name:caso-${c.slug}`}>
+                {c.data.mapLabel ?? c.data.title}
+              </span>
+              <span class="case-axes" aria-hidden="true">
+                {c.data.areas.map((a) => <i class={`axis-${a}`} />)}
+              </span>
+              <span class="case-meta">
+                {c.data.typeLabel ?? typeLabels[lang][c.data.type]}
+                {!isPendingValue(c.data.period) && <> · {shortPeriod(c.data.period)}</>}
+              </span>
+            </a>
+            <p class="node-detail" id={`case-desc-${c.slug}`}>
+              <strong>{c.data.category}.</strong> {c.data.summary}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <!-- Miniatura (pantallas estrechas): referencia visual, la navegación es la lista de casos -->
+  <svg class="map-thumb" viewBox={`0 0 ${VIEW_W} ${VIEW_H}`} role="img" aria-label={t.mapThumb}>
+    {lines.map((l) => <path class={`link axis-${l.axis}`} d={l.d} />)}
+    {
+      hubList.map((h) => {
+        const b = h.box;
+        return (
+          <g class={`axis-${h.id}`}>
+            <rect class="t-hub" x={(b.column - 1) * CELL_W + 6} y={(b.row - 1) * CELL_H + 10} width={b.width * CELL_W - 12} height={b.height * CELL_H - 20} />
+            <text x={center(b).x} y={center(b).y} dominant-baseline="middle" text-anchor="middle">{h.label}</text>
+          </g>
+        );
+      })
+    }
+    {
+      cases.map((c) => {
+        const b = c.data.map;
+        return <rect class={`t-case axis-${primaryAxis(c.data.areas)}`} x={(b.column - 1) * CELL_W + 10} y={(b.row - 1) * CELL_H + 14} width={b.width * CELL_W - 20} height={b.height * CELL_H - 28} />;
+      })
+    }
+  </svg>
+
+  <p class="map-alt">
+    <a href={`#${lang === 'es' ? 'casos' : 'cases'}`}>{t.mapList}</a>
+  </p>
+</figure>
+
+<style is:inline set:html={highlightCss}></style>
+
+<style>
+  .system-map {
+    margin: 0;
+    display: grid;
+    gap: var(--space-4);
+  }
+  .map-caption {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-4);
+    font-size: 0.9375rem;
+  }
+  .legend {
+    flex-basis: 100%;
+  }
+
+  /* ---- Lienzo ---- */
+  .map-canvas {
+    position: relative;
+    display: none;
+    width: 100%;
+    isolation: isolate;
+  }
+  .map-lines {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .grid path {
+    stroke: var(--line);
+    stroke-width: 0.5;
+    opacity: 0.45;
+  }
+  .link {
+    fill: none;
+    stroke: var(--axis, var(--line-strong));
+    stroke-width: 1.5;
+    opacity: 0.6;
+    transition:
+      opacity 120ms ease,
+      stroke-width 120ms ease;
+  }
+
+  /* Dibujo de líneas al cargar: < 1 s en total. Los nodos están visibles desde el inicio. */
+  @media (prefers-reduced-motion: no-preference) {
+    .map-lines .link {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: draw 520ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      animation-delay: calc(var(--i) * 18ms);
+    }
+    .map-lines .grid {
+      animation: fade 400ms ease-out both;
+    }
+  }
+  @keyframes draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .map-nodes {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .map-nodes li {
+    position: absolute;
+    z-index: 1;
+    padding: 10px 6px;
+  }
+  .map-nodes li:has(a:hover, a:focus-visible) {
+    z-index: 2;
+  }
+  .map-nodes a {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 0 0.75rem;
+    background: var(--bg);
+    border: 1px solid var(--line-strong);
+    text-decoration: none;
+    line-height: 1.2;
+    transition:
+      background-color 120ms ease,
+      border-color 120ms ease;
+  }
+  .hub a {
+    align-items: center;
+    text-align: center;
+    border-width: 1.5px 1.5px 1.5px 6px;
+    border-color: var(--axis);
+  }
+  .hub-name {
+    color: var(--axis);
+    font-weight: 700;
+    font-stretch: 108%;
+    font-size: 0.8125rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .case a {
+    border-left: 4px solid var(--axis);
+    padding-right: 2.25rem;
+  }
+  .case-axes {
+    position: absolute;
+    top: 0.625rem;
+    right: 0.625rem;
+    display: flex;
+    gap: 3px;
+  }
+  .case-axes i {
+    width: 0.5rem;
+    height: 0.5rem;
+    background: var(--axis);
+  }
+  .case-name {
+    font-weight: 650;
+    font-size: 0.9375rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .case-meta {
+    margin-top: 0.125rem;
+    font-size: 0.75rem;
+    color: var(--text-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Estado activo: acento amarillo como fondo, texto oscuro (contraste AA). */
+  .map-nodes a:hover,
+  .map-nodes a:focus-visible {
+    background: var(--accent);
+    border-color: var(--text);
+    color: var(--on-accent);
+  }
+  .map-nodes a:hover .case-meta,
+  .map-nodes a:focus-visible .case-meta,
+  .map-nodes a:hover .hub-name,
+  .map-nodes a:focus-visible .hub-name {
+    color: var(--on-accent);
+  }
+  .case a:hover,
+  .case a:focus-visible {
+    border-left-color: var(--axis);
+  }
+  .map-nodes a:focus-visible {
+    outline-offset: 4px;
+  }
+
+  /* Descripción corta al activar */
+  .node-detail {
+    position: absolute;
+    z-index: 3;
+    top: calc(100% - 4px);
+    left: 5px;
+    width: max(calc(100% - 10px), 18rem);
+    margin: 0;
+    padding: 0.625rem 0.75rem;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--text);
+    font-size: 0.875rem;
+    font-weight: 400;
+    font-stretch: 100%;
+    letter-spacing: 0;
+    text-transform: none;
+    text-align: left;
+    line-height: 1.45;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 120ms ease;
+    pointer-events: none;
+  }
+  .detail-up .node-detail {
+    top: auto;
+    bottom: calc(100% - 4px);
+  }
+  .detail-left .node-detail {
+    left: auto;
+    right: 5px;
+  }
+  .hub .node-detail {
+    left: 50%;
+    translate: -50% 0;
+  }
+  .map-nodes a:hover + .node-detail,
+  .map-nodes a:focus-visible + .node-detail {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  /* ---- Miniatura ---- */
+  .map-thumb {
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--line);
+    padding: 0.5rem;
+  }
+  .map-thumb .link {
+    stroke-width: 4;
+    opacity: 0.7;
+  }
+  .t-hub {
+    fill: var(--bg);
+    stroke: var(--axis);
+    stroke-width: 4;
+  }
+  .t-case {
+    fill: color-mix(in srgb, var(--axis) 22%, var(--bg));
+    stroke: var(--axis);
+    stroke-width: 3;
+  }
+  .map-thumb text {
+    fill: var(--axis);
+    font-family: var(--font);
+    font-size: 30px;
+    font-weight: 700;
+  }
+
+  .map-alt {
+    font-size: 0.9375rem;
+  }
+
+  @media (min-width: 60rem) {
+    .map-canvas {
+      display: block;
+    }
+    .map-thumb {
+      display: none;
+    }
+  }
+</style>

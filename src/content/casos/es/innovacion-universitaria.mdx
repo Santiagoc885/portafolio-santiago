@@ -1,0 +1,94 @@
+---
+title: Módulo de innovación universitaria
+mapLabel: Innovación · USB
+summary: "Módulo en Django y PostgreSQL para gestionar iniciativas de innovación, con autenticación, roles, CRUD, API y procedimientos almacenados."
+role: Software Developer
+organization: Universidad de San Buenaventura Medellín
+period: 2024 – 2026
+tools: [Python, Django, PostgreSQL, APIs, Stored Procedures, Git, Jira, Scrum]
+type: academic
+category: Software + Datos
+order: 3
+connects: [proyectos, datos]
+areas: [software, datos]
+map: { column: 1, row: 8, width: 3, height: 1 }
+---
+
+## Contexto
+
+Proyecto académico de innovación en la Universidad de San Buenaventura Medellín, desarrollado en un equipo de unas 10 personas bajo Scrum, con Jira y Git. No es experiencia laboral.
+
+## Problema
+
+La universidad necesitaba centralizar y digitalizar la gestión de sus iniciativas de innovación: registrar, consultar, actualizar y administrar la información de ideas y oportunidades.
+
+## Mi responsabilidad
+
+Me enfoqué en el backend con Django y PostgreSQL:
+
+- Funcionalidades CRUD con Class-Based Views.
+- Lógica de negocio.
+- Autenticación y control de acceso por roles.
+- Integración con la API y con procedimientos almacenados.
+
+El resto del equipo trabajó en otras funcionalidades del backend, el frontend, la integración y las pruebas.
+
+## Análisis
+
+El problema se entendió a partir de los requerimientos del proyecto y de las reuniones del equipo. Las funcionalidades se dividieron en tareas en Jira para hacer seguimiento al desarrollo.
+
+## Solución
+
+Un módulo web en Django para gestionar iniciativas de innovación, con acceso restringido por rol, operaciones CRUD y lógica de datos apoyada en procedimientos almacenados.
+
+<UserStory
+  as="usuario autenticado con un rol asignado"
+  want="acceder solo a las funciones que permite mi rol"
+  so="que cada perfil gestione únicamente la información que le corresponde"
+  criteria={[
+    {
+      given: 'que inicié sesión con un rol',
+      when: 'intento abrir una vista que ese rol no permite',
+      then: 'el sistema no me da acceso a esa vista',
+    },
+  ]}
+/>
+
+## Arquitectura
+
+<ArchitectureDiagram
+  title="Módulo de innovación"
+  layers={[
+    { label: 'Presentación', nodes: ['Interfaz'] },
+    { label: 'Aplicación', nodes: ['Backend Django'] },
+    { label: 'Integración', nodes: ['API'] },
+    { label: 'Datos', nodes: ['Procedimientos almacenados', 'PostgreSQL'] },
+  ]}
+  edges={[
+    ['Interfaz', 'Backend Django'],
+    ['Backend Django', 'API'],
+    ['API', 'Procedimientos almacenados'],
+    ['Procedimientos almacenados', 'PostgreSQL'],
+  ]}
+  note="La respuesta vuelve por el mismo camino hasta la interfaz."
+/>
+
+## Implementación
+
+- **Class-Based Views** para organizar las operaciones CRUD de forma estructurada y reutilizable.
+- **Procedimientos almacenados** para centralizar operaciones sobre la base de datos, según los requerimientos técnicos del proyecto.
+- Autenticación y permisos por rol dentro de Django.
+
+## Validación
+
+Pruebas funcionales de cada funcionalidad y verificación de la integración entre backend, base de datos e interfaz. El proyecto se validó además con demostraciones y revisiones frente a los requerimientos.
+
+## Resultado
+
+Un módulo funcional para gestionar iniciativas de innovación, construido y presentado como parte del proceso formativo.
+
+## Aprendizajes
+
+Aprendí a trabajar en equipo sobre un mismo proyecto, a estructurar funcionalidades backend, a integrar una aplicación con PostgreSQL y a implementar autenticación y permisos por rol.
+
+Hoy definiría la arquitectura, las pruebas automatizadas y la documentación de las APIs desde el inicio, para reducir problemas de integración y facilitar el mantenimiento.

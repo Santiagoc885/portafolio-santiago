@@ -1,0 +1,24 @@
+---
+import { profile } from '../data/profile';
+import { hasCv } from '../lib/cv';
+import { getLang, PENDING, useT } from '../i18n';
+const lang = getLang(Astro.currentLocale);
+const t = useT(lang);
+const available = hasCv();
+---
+
+{
+  available ? (
+    <a class="button" href={profile.cvPath} download>
+      {t.cvDownload} <span class="muted">PDF</span>
+    </a>
+  ) : profile.cvFallbackUrl ? (
+    <a class="button" href={profile.cvFallbackUrl} rel="me noopener">
+      {t.cvLinkedIn}
+    </a>
+  ) : (
+    <span class="button" aria-disabled="true" title={t.cvMissing}>
+      {t.cvDownload} <span class="pending">{PENDING[lang]}</span>
+    </span>
+  )
+}

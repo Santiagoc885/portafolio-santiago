@@ -1,0 +1,81 @@
+---
+title: Activos de software y Business Intelligence en Grupo ISA / XM
+mapLabel: ISA / XM · BI
+summary: "Dashboards en Power BI y análisis con Python sobre activos y licencias de software para identificar licencias sin uso o subutilizadas."
+role: Practicante de Software Asset Management / Business Intelligence
+organization: Grupo ISA / XM
+period: Julio 2023 – Enero 2024
+tools: [Power BI, Python, Pandas, SharePoint, Excel, Service Desk]
+type: professional
+category: Datos + BI
+order: 1
+connects: [experiencia, datos]
+areas: [datos]
+map: { column: 1, row: 2, width: 3, height: 1 }
+---
+
+## Contexto
+
+Práctica profesional en modalidad híbrida dentro de la gestión de activos de software (Software Asset Management), con foco en Business Intelligence.
+
+## Problema
+
+Los reportes de licencias se preparaban principalmente a mano en Excel, recopilando y consolidando la información de forma periódica. Cada actualización tomaba del orden de un día de trabajo repetitivo para consolidar y validar los datos.
+
+Además, hacía falta identificar qué licencias no se usaban o estaban subutilizadas para apoyar decisiones sobre esos activos.
+
+## Mi responsabilidad
+
+- Construir dashboards en Power BI.
+- Procesar y analizar datos de activos y licencias con Python.
+- Automatizar los reportes periódicos.
+- Identificar licencias sin uso o subutilizadas.
+- Apoyar el análisis para la toma de decisiones sobre activos de software.
+
+## Análisis
+
+El trabajo se hizo sobre más de 10.000 registros de activos y licencias, obtenidos principalmente de SharePoint, donde se centralizaba la información de licenciamiento.
+
+Para decidir si una licencia estaba subutilizada se comparaba su nivel de uso y actividad registrada frente a la licencia asignada.
+
+## Solución
+
+Un flujo automatizado con Python y Pandas que extrae, limpia y consolida los datos de licencias, y dashboards en Power BI para consultar el estado de activos y licencias.
+
+## Arquitectura
+
+<ProcessMap
+  title="De registros a decisiones sobre licencias"
+  lanes={['SharePoint', 'Python', 'Power BI', 'Decisión']}
+  steps={[
+    { lane: 'SharePoint', label: 'Información centralizada de licencias (más de 10.000 registros)' },
+    { lane: 'Python', label: 'Extracción, limpieza y análisis con Pandas' },
+    { lane: 'Python', label: 'Generación automatizada de reportes periódicos' },
+    { lane: 'Power BI', label: 'Dashboards de activos y licencias' },
+    { lane: 'Decisión', label: 'Licencias con poco o ningún uso, candidatas a reasignación o liberación' },
+  ]}
+/>
+
+## Implementación
+
+- Pandas para la manipulación y el análisis de los datos.
+- Reportes generados de forma periódica para facilitar la actualización y el seguimiento de las licencias.
+- Validación de totales y registros después de cada actualización.
+
+## Validación
+
+Los resultados se comparaban con los datos originales en SharePoint y los indicadores se revisaban con el área responsable. En cada actualización se verificaba que los totales y registros coincidieran.
+
+## Resultado
+
+<Metric label="Tiempo de preparación de un reporte" beforeText="1 día" afterText="3 horas" />
+
+<Fact value="+10.000" label="registros de activos y licencias analizados" />
+
+El análisis identificó licencias con poco o ningún uso que podían revisarse para reasignarlas o liberarlas, lo que dio al área oportunidades concretas para optimizar el gasto en licenciamiento.
+
+## Aprendizajes
+
+Aprendí a trabajar con datos reales de principio a fin: extracción, limpieza, análisis y visualización en Power BI. También entendí que la calidad de los datos se valida antes de presentar indicadores.
+
+Hoy estructuraría el proceso desde el inicio pensando en automatización, trazabilidad y reutilización del flujo de datos.

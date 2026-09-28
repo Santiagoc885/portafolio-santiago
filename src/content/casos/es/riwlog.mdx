@@ -1,0 +1,92 @@
+---
+title: Riwlog / Riwlogic
+mapLabel: Riwlog
+summary: "Plataforma de competencias de programación que registra el proceso de resolución y clasifica si el comportamiento es humano, generado o asistido por IA."
+role: Full Stack Developer
+period: "2026"
+tools: [Node.js, Express, FastAPI, PostgreSQL, JavaScript, HTML, CSS, IA]
+type: personal
+typeLabel: Personal / Formación
+category: Software + AI
+status: Prototipo funcional en desarrollo
+order: 4
+connects: [proyectos, ai, software]
+areas: [software, ai]
+map: { column: 10, row: 8, width: 3, height: 1 }
+---
+
+## Contexto
+
+Proyecto de Riwi (2026): una plataforma para competencias de programación. Quedó como un prototipo funcional en desarrollo, con los componentes principales implementados y listo para seguir con pruebas y mejoras del clasificador.
+
+## Problema
+
+En una competencia de programación normalmente solo se evalúa el resultado final, que no muestra cómo se llegó a la solución ni si hubo asistencia de IA.
+
+## Mi responsabilidad
+
+Participé como Full Stack Developer, principalmente en el backend y en la integración con el servicio de clasificación:
+
+- Diseño de la arquitectura.
+- Registro de los eventos de los participantes.
+- Integración con la base de datos.
+- Comunicación entre el backend principal y el servicio de clasificación.
+
+## Análisis
+
+El proceso de resolución deja rastro en acciones concretas: escribir, pegar, eliminar y ejecutar código. Usar ese proceso como señal adicional, y no solo el código final, permite identificar posibles patrones de asistencia de IA.
+
+<UserStory
+  as="evaluador de una competencia de programación"
+  want="ver los eventos del proceso de resolución de cada participante"
+  so="evaluar también el proceso de desarrollo, no solamente el resultado final"
+  criteria={[
+    {
+      given: 'que un participante está resolviendo un reto',
+      when: 'escribe, pega, elimina o ejecuta código',
+      then: 'la acción queda registrada como un evento del proceso',
+    },
+  ]}
+/>
+
+## Solución
+
+Dos servicios separados: uno registra los eventos del proceso y otro los clasifica para determinar si el comportamiento corresponde principalmente a contenido humano, generado por IA o asistido por IA.
+
+## Arquitectura
+
+<ProcessMap
+  title="Del evento a la clasificación"
+  lanes={['Participante', 'Node.js / Express', 'PostgreSQL', 'FastAPI']}
+  steps={[
+    { lane: 'Participante', label: 'Escribe, pega, borra y ejecuta código' },
+    { lane: 'Node.js / Express', label: 'Recibe y registra cada evento' },
+    { lane: 'PostgreSQL', label: 'Guarda usuarios, sesiones, problemas y eventos' },
+    { lane: 'FastAPI', label: 'Analiza los eventos: humano, generado por IA o asistido por IA' },
+  ]}
+/>
+
+## Implementación
+
+- **Node.js / Express** recibe y registra los eventos de la interacción del participante.
+- **FastAPI** expone el servicio de clasificación.
+- **PostgreSQL** almacena usuarios, sesiones, problemas y eventos.
+- El clasificador usa como variables los eventos de escritura, pegado, eliminación y ejecución, junto con la frecuencia y el tiempo entre eventos.
+
+## Validación
+
+Para el registro se probaron las distintas acciones del usuario, verificando que cada evento llegara al backend y quedara almacenado.
+
+La clasificación se validó con distintos escenarios de interacción, comparando el comportamiento esperado con la respuesta del clasificador. Esa validación también mostró qué partes necesitaban más datos y ajustes.
+
+## Resultado
+
+Un prototipo funcional que valida la arquitectura y el concepto de analizar el comportamiento durante la resolución.
+
+No hay todavía una métrica formal de precisión del clasificador: para reportarla haría falta una evaluación con un conjunto de datos etiquetado.
+
+## Aprendizajes
+
+Aprendí a diseñar una arquitectura con servicios separados y a integrar un backend tradicional con un servicio de IA especializado. Un clasificador confiable no depende solo del modelo: necesita una buena estrategia de recolección, etiquetado y validación de datos.
+
+Hoy definiría desde el inicio el esquema de eventos, construiría un dataset etiquetado y establecería métricas como precisión, recall y matriz de confusión antes de evaluar el clasificador.

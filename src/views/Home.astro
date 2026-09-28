@@ -1,0 +1,338 @@
+---
+/** Página de inicio, compartida por /  y /en. El idioma sale de la URL. */
+import Base from '../layouts/Base.astro';
+import SystemMap from '../components/SystemMap.astro';
+import CaseIndex from '../components/CaseIndex.astro';
+import ContactLinks from '../components/ContactLinks.astro';
+import CvButton from '../components/CvButton.astro';
+import RoleGrid from '../components/RoleGrid.astro';
+import Pending from '../components/Pending.astro';
+import { profile, positioningAxis, getText, getExperience, getStack, getProcess } from '../data/profile';
+import { getLang, useT, anchors, paths } from '../i18n';
+import { getCases } from '../lib/cases';
+
+const lang = getLang(Astro.currentLocale);
+const t = useT(lang);
+const a = anchors[lang];
+const txt = getText(lang);
+const cases = await getCases(lang);
+const experience = getExperience(lang);
+const stack = getStack(lang);
+const process = getProcess(lang);
+---
+
+<Base>
+  <section class="hero wrap" aria-labelledby="nombre">
+    <p class="label">{txt.title} · {profile.city}</p>
+    <h1 id="nombre">{profile.name}</h1>
+    <RoleGrid roles={profile.positioning} axisByRole={positioningAxis} label={t.rolesLabel} />
+    <p class="statement">{txt.statement}</p>
+    <p class="availability">
+      <span class="status-dot" aria-hidden="true"></span>
+      <span><strong>{t.available}</strong> {txt.availability}</span>
+    </p>
+    <div class="actions">
+      <a class="button" href={`#${a.cases}`}>{t.seeCases}</a>
+      <CvButton />
+    </div>
+  </section>
+
+  <section class="wrap map-section" aria-label={t.mapAria}>
+    <SystemMap cases={cases} />
+  </section>
+
+  <section id={a.cases} class="section wrap" aria-labelledby="casos-titulo">
+    <header class="section-head">
+      <p class="label">{t.casesLabel}</p>
+      <h2 id="casos-titulo">{t.casesTitle}</h2>
+      <p>{t.casesIntro}</p>
+    </header>
+    <CaseIndex cases={cases} />
+  </section>
+
+  <section id={a.experience} class="section wrap" aria-labelledby="exp-titulo">
+    <header class="section-head">
+      <p class="label">{t.expLabel}</p>
+      <h2 id="exp-titulo">{t.expTitle(profile.experienceYears)}</h2>
+      <p>{txt.summary}</p>
+    </header>
+    <ol class="timeline" role="list">
+      {
+        experience.map((e) => (
+          <li>
+            <div class="when">
+              <span>{e.period ?? <Pending what={t.period} />}</span>
+              {e.mode && <span class="muted">{e.mode}</span>}
+            </div>
+            <div class="what">
+              <h3>
+                {e.role} <span class="org">· {e.organization}</span>
+              </h3>
+              {e.context && <p class="muted">{e.context}</p>}
+              <ul class="highlights">
+                {e.highlights.map((h) => (
+                  <li>{h}</li>
+                ))}
+                {e.facts?.map((f) => (
+                  <li class="fact">{f}</li>
+                ))}
+              </ul>
+              <ul class="tags" aria-label={t.technologies}>
+                {e.tools.map((t) => (
+                  <li>{t}</li>
+                ))}
+              </ul>
+              <p class="exp-foot">
+                {e.pending?.map((p) => (
+                  <span class="muted">
+                    {p}: <Pending what={`${p} ${t.in} ${e.organization}`} />
+                  </span>
+                ))}
+                {e.caseSlug && <a href={paths.case(lang, e.caseSlug)}>{t.readCase}</a>}
+              </p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section id={a.stack} class="section wrap" aria-labelledby="stack-titulo">
+    <header class="section-head">
+      <p class="label">{t.stackLabel}</p>
+      <h2 id="stack-titulo">{t.stackTitle}</h2>
+      <p>{t.stackIntro}</p>
+    </header>
+    <div class="stack">
+      {
+        stack.map((g) => (
+          <section class={g.hub ? `axis-${g.hub}` : undefined} aria-labelledby={`stack-${g.id}`}>
+            <h3 id={`stack-${g.id}`}>{g.label}</h3>
+            <ul class="stack-list">
+              {g.items.map((i) => (
+                <li>{i}</li>
+              ))}
+            </ul>
+            {g.note && <p class="muted note">{g.note}</p>}
+          </section>
+        ))
+      }
+    </div>
+  </section>
+
+  <section id={a.process} class="section wrap" aria-labelledby="proceso-titulo">
+    <header class="section-head">
+      <p class="label">{t.processLabel}</p>
+      <h2 id="proceso-titulo">{t.processTitle}</h2>
+    </header>
+    <ol class="flow" role="list">
+      {
+        process.map((p) => (
+          <li>
+            <h3>{p.step}</h3>
+            <p>{p.detail}</p>
+          </li>
+        ))
+      }
+    </ol>
+    <p class="flow-loop muted">{t.processLoop}</p>
+    <p class="flow-more"><a href={`${paths.about(lang)}#${a.ai}`}>{t.processAi}</a></p>
+  </section>
+
+  <section id={a.contact} class="section wrap contact-section" aria-labelledby="contacto-titulo">
+    <header class="section-head">
+      <p class="label">{t.contact}</p>
+      <h2 id="contacto-titulo">{t.contactTitle}</h2>
+      <p>{profile.city}. {txt.availability}</p>
+      <div><CvButton /></div>
+    </header>
+    <ContactLinks />
+  </section>
+</Base>
+
+<style>
+  .hero {
+    display: grid;
+    gap: var(--space-4);
+    padding-block: var(--space-6) var(--space-5);
+  }
+  .hero h1 {
+    max-width: 14ch;
+  }
+  /* Frase principal: misma familia (Archivo), expandida y ligera para contrastar con el nombre */
+  .statement {
+    font-size: clamp(1.25rem, 2.4vw, 1.625rem);
+    font-weight: 320;
+    font-stretch: 115%;
+    letter-spacing: 0.005em;
+    line-height: 1.45;
+    max-width: 36ch;
+  }
+  .availability {
+    display: flex;
+    gap: var(--space-2);
+    align-items: baseline;
+    color: var(--text-2);
+  }
+  .availability strong {
+    color: var(--text);
+    font-weight: 620;
+  }
+  .status-dot {
+    flex: none;
+    width: 0.625rem;
+    height: 0.625rem;
+    border: 1.5px solid var(--text);
+    background: var(--accent);
+    translate: 0 -0.05em;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+  .map-section {
+    padding-block: var(--space-4) var(--space-7);
+  }
+
+  /* Experiencia */
+  .timeline {
+    padding: 0;
+    list-style: none;
+    border-top: 3px solid var(--c-experiencia);
+  }
+  .timeline > li {
+    display: grid;
+    gap: var(--space-2) var(--space-5);
+    padding-block: var(--space-5);
+    border-bottom: 1px solid var(--line);
+  }
+  .when {
+    display: grid;
+    align-content: start;
+    font-weight: 560;
+    font-size: 0.9375rem;
+  }
+  .what {
+    display: grid;
+    gap: var(--space-3);
+  }
+  .org {
+    font-weight: 560;
+    color: var(--c-experiencia);
+  }
+  .highlights {
+    display: grid;
+    gap: var(--space-1);
+    padding-left: 1.125rem;
+    max-width: var(--measure);
+  }
+  .highlights .fact {
+    font-weight: 620;
+  }
+  .highlights li::marker {
+    color: var(--text-2);
+  }
+  .exp-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    font-size: 0.9375rem;
+  }
+  .exp-foot a {
+    font-weight: 600;
+  }
+
+  /* Stack */
+  .stack {
+    display: grid;
+    gap: var(--space-5) var(--space-4);
+  }
+  .stack section {
+    display: grid;
+    gap: var(--space-2);
+    align-content: start;
+    padding-top: var(--space-3);
+    border-top: 3px solid var(--axis, var(--text));
+  }
+  .stack h3 {
+    font-size: 1rem;
+    font-stretch: 104%;
+  }
+  .stack-list {
+    padding: 0;
+    list-style: none;
+    color: var(--text-2);
+  }
+  .note {
+    font-size: 0.875rem;
+  }
+
+  /* Cómo trabajo */
+  .flow {
+    display: grid;
+    padding: 0;
+    list-style: none;
+  }
+  .flow li {
+    position: relative;
+    display: grid;
+    gap: var(--space-1);
+    padding: 0 0 var(--space-4) var(--space-5);
+    border-left: 1px solid var(--line-strong);
+    margin-left: 0.4375rem;
+  }
+  .flow li::before {
+    content: '';
+    position: absolute;
+    left: -0.4375rem;
+    top: 0.25rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    border: 1.5px solid var(--text);
+    background: var(--bg);
+  }
+  .flow li:last-child::before {
+    background: var(--accent);
+  }
+  .flow h3 {
+    font-size: 1.125rem;
+  }
+  .flow p {
+    color: var(--text-2);
+  }
+  .flow-loop,
+  .flow-more {
+    margin-top: var(--space-3);
+  }
+  .flow-more a {
+    font-weight: 600;
+  }
+
+  .contact-section .section-head div {
+    margin-top: var(--space-2);
+  }
+
+  @media (min-width: 48rem) {
+    .timeline > li {
+      grid-template-columns: 14rem 1fr;
+    }
+    .stack {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .contact-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-5);
+    }
+    .flow li {
+      grid-template-columns: 16rem 1fr;
+      column-gap: var(--space-5);
+    }
+  }
+  @media (min-width: 64rem) {
+    .stack {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+</style>

@@ -1,0 +1,118 @@
+---
+/** Índice de casos agrupado por tipo. Es también la alternativa en lista del mapa. */
+import type { Case } from '../lib/cases';
+import { typeLabels, typeOrder } from '../data/profile';
+import { getLang, paths, useT } from '../i18n';
+import { caseAxes, hubLabel, primaryAxis } from '../data/map';
+
+interface Props {
+  cases: Case[];
+}
+const { cases } = Astro.props;
+const lang = getLang(Astro.currentLocale);
+const t = useT(lang);
+const groups = typeOrder
+  .map((t) => ({ type: t, items: cases.filter((c) => c.data.type === t) }))
+  .filter((g) => g.items.length);
+---
+
+<div class="index">
+  {
+    groups.map((g) => (
+      <section aria-labelledby={`grupo-${g.type}`}>
+        <h3 id={`grupo-${g.type}`} class="label">
+          {typeLabels[lang][g.type]}
+        </h3>
+        <ul class="cases" role="list">
+          {g.items.map((c) => (
+            <li class={`case-item axis-${primaryAxis(c.data.areas)}`}>
+              <a href={paths.case(lang, c.slug)}>
+                <span class="row-top">
+                  <span class="name">{c.data.title}</span>
+                  <span class="period muted">{c.data.period}</span>
+                </span>
+                <span class="summary">{c.data.summary}</span>
+                <div class="meta">
+                  <ul class="axis-chips" aria-label={t.axes}>
+                    {caseAxes(c.data.areas, c.data.type).map((a) => (
+                      <li class={`axis-${a}`}>{hubLabel(a, lang)}</li>
+                    ))}
+                  </ul>
+                  <span class="muted">
+                    {c.data.category}
+                    {c.data.typeLabel && <> · {c.data.typeLabel}</>}
+                  </span>
+                </div>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</div>
+
+<style>
+  .index {
+    display: grid;
+    gap: var(--space-5);
+  }
+  section {
+    display: grid;
+    gap: var(--space-2);
+  }
+  .cases {
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--text);
+  }
+  .case-item {
+    border-bottom: 1px solid var(--line);
+  }
+  .case-item > a {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-3) var(--space-2) var(--space-3) var(--space-3);
+    text-decoration: none;
+    border-left: 3px solid var(--axis);
+    transition:
+      border-color 120ms ease,
+      background-color 120ms ease;
+  }
+  .case-item > a:hover,
+  .case-item > a:focus-visible {
+    background: color-mix(in srgb, var(--axis) 8%, var(--surface));
+  }
+  a:hover .name,
+  a:focus-visible .name {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+  .row-top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-1) var(--space-3);
+  }
+  .name {
+    font-size: 1.25rem;
+    font-weight: 680;
+    font-stretch: 94%;
+  }
+  .period,
+  .meta {
+    font-size: 0.875rem;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) var(--space-4);
+    margin-top: var(--space-1);
+  }
+  .summary {
+    max-width: var(--measure);
+  }
+</style>

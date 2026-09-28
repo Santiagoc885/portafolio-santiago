@@ -1,0 +1,103 @@
+---
+title: AION POS
+mapLabel: AION POS
+summary: "Multi-tenant POS system for restaurants and coffee shops: roles, QR or link bookings, menu, orders, stock, invoicing and AI recommendations."
+role: Product Owner and developer
+period: "2026"
+tools: [Next.js, React, TypeScript, Prisma, PostgreSQL, AI]
+type: training
+typeLabel: Collaborative / Training
+category: Full Stack + Business
+order: 5
+connects: [proyectos]
+areas: [software, ai]
+map: { column: 1, row: 10, width: 3, height: 1 }
+---
+
+## Context
+
+Collaborative Riwi project (2026): a POS system for restaurants and coffee shops, built as a working MVP.
+
+## Problem
+
+A restaurant or coffee shop needs to manage its menu, orders, bookings, customers and administration. The goal was to do all of it from a single platform.
+
+## My responsibility
+
+I was the team's **Product Owner** under Scrum: I defined, prioritized and tracked features. I also took part in development, especially:
+
+- Bookings.
+- Order management.
+- Users.
+- Multi-tenant structure.
+
+## Analysis
+
+Scope was defined from business needs and split into modules. Tasks were written as user stories and prioritized by sprint, focusing on what a working MVP needed.
+
+<UserStory
+  as="a restaurant customer"
+  want="to make a booking from a QR code or a link"
+  so="I can book a table quickly without having to do it at the restaurant"
+  criteria={[
+    {
+      given: "I open a restaurant's QR code or link",
+      when: 'I complete the booking',
+      then: 'the booking is recorded only for that restaurant',
+    },
+  ]}
+/>
+
+## Solution
+
+System modules:
+
+- Authentication and roles.
+- Staff and administration.
+- Customers.
+- Bookings through QR code or link.
+- Menu.
+- Orders and delivery.
+- Stock.
+- Invoicing.
+- AI-assisted recommendations.
+
+## Architecture
+
+<ArchitectureDiagram
+  title="AION POS"
+  layers={[
+    { label: 'Application', nodes: ['Next.js + React (TypeScript)'] },
+    { label: 'Data access', nodes: ['Prisma'] },
+    { label: 'Data', nodes: ['PostgreSQL'] },
+  ]}
+  edges={[
+    ['Next.js + React (TypeScript)', 'Prisma'],
+    ['Prisma', 'PostgreSQL'],
+  ]}
+  crossCutting={[
+    { label: 'Multi-tenant', nodes: ['Data per business'] },
+    { label: 'AI', nodes: ['Recommendations'] },
+  ]}
+/>
+
+## Implementation
+
+- **Multi-tenant:** every record is tied to its business, keeping each restaurant's data separate.
+- **AI recommendations:** use the menu and the preferences or context of the order to suggest dishes from what each business offers.
+
+## Validation
+
+The system's flows were tested, especially authentication, bookings, orders and data separation between businesses. The team also reviewed the work during sprints.
+
+## Result
+
+A working MVP with the POS's main modules.
+
+There is no production metric for improvement or adoption, so no figure is reported.
+
+## Learnings
+
+I learned to combine a technical perspective with defining and prioritizing features as Product Owner, and strengthened my understanding of multi-tenant architecture in applications built around real business processes.
+
+Today I would define acceptance criteria and success metrics from the start, because they make validating the product much easier.

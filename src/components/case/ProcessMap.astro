@@ -1,0 +1,211 @@
+---
+/**
+ * Mapa de proceso por carriles, generado desde datos.
+ * Carriles = columnas; pasos = filas en orden. Entre pasos se dibuja el traspaso entre carriles.
+ * Un paso solo se marca como cuello de botella si trae `evidence`.
+ * Semánticamente es una lista ordenada; en pantallas estrechas se lee como lista.
+ */
+import { getLang, useT } from '../../i18n';
+
+interface Step {
+  lane: string;
+  label: string;
+  bottleneck?: { evidence: string };
+}
+interface Props {
+  title: string;
+  lanes: string[];
+  steps: Step[];
+  note?: string;
+}
+const { title, lanes, steps, note } = Astro.props;
+const t = useT(getLang(Astro.currentLocale));
+const laneIndex = (l: string) => {
+  const i = lanes.indexOf(l);
+  if (i < 0) throw new Error(`ProcessMap: carril desconocido "${l}"`);
+  return i;
+};
+const id = `pm-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+---
+
+<figure class="process" aria-labelledby={id} style={`--lanes:${lanes.length}`}>
+  <figcaption id={id}>
+    <span class="label">{t.process}</span>
+    <span class="title">{title}</span>
+  </figcaption>
+
+  <div class="lanes" aria-hidden="true">
+    {lanes.map((l, i) => <span style={`grid-column:${i + 1}`}>{l}</span>)}
+  </div>
+
+  <ol class="steps">
+    {
+      steps.map((s, i) => {
+        const col = laneIndex(s.lane) + 1;
+        const prev = i > 0 ? laneIndex(steps[i - 1].lane) + 1 : col;
+        const from = Math.min(prev, col);
+        const to = Math.max(prev, col);
+        return (
+          <li style={`--row:${i + 1}`}>
+            {i > 0 && (
+              <span
+                class:list={['handoff', prev === col ? 'same' : prev < col ? 'right' : 'left']}
+                style={`grid-column:${from} / ${to + 1};--span:${to - from + 1}`}
+                aria-hidden="true"
+              />
+            )}
+            <span class:list={['step', s.bottleneck && 'is-bottleneck']} style={`grid-column:${col}`}>
+              <span class="step-lane">{s.lane}</span>
+              <span class="step-label">{s.label}</span>
+              {s.bottleneck && (
+                <span class="evidence">
+                  <b>{getLang(Astro.currentLocale) === 'es' ? 'Cuello de botella.' : 'Bottleneck.'}</b> {s.bottleneck.evidence}
+                </span>
+              )}
+            </span>
+          </li>
+        );
+      })
+    }
+  </ol>
+  {note && <p class="note muted">{note}</p>}
+</figure>
+
+<style>
+  .process {
+    margin: var(--space-5) 0;
+    display: grid;
+    gap: var(--space-3);
+  }
+  figcaption {
+    display: grid;
+    gap: 0.125rem;
+  }
+  .title {
+    font-weight: 650;
+  }
+  .lanes {
+    display: none;
+  }
+  .steps {
+    display: grid;
+    gap: var(--space-2);
+    padding: 0;
+    list-style: none;
+  }
+  .step {
+    display: grid;
+    gap: 0.125rem;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--line-strong);
+    background: var(--bg);
+    font-size: 0.9375rem;
+    line-height: 1.4;
+  }
+  .step-lane {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-2);
+  }
+  .is-bottleneck {
+    border: 2px solid var(--text);
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+  .is-bottleneck .step-lane {
+    color: var(--on-accent);
+  }
+  .evidence {
+    font-size: 0.8125rem;
+  }
+  .handoff {
+    display: none;
+  }
+  .note {
+    font-size: 0.875rem;
+  }
+
+  @media (min-width: 48rem) {
+    .lanes,
+    .steps li {
+      display: grid;
+      grid-template-columns: repeat(var(--lanes), minmax(0, 1fr));
+      column-gap: var(--space-3);
+    }
+    .lanes {
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--line);
+    }
+    .lanes span {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-2);
+    }
+    .steps {
+      gap: 0;
+    }
+    .step-lane {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+    }
+    .step {
+      grid-row: 2;
+    }
+    .handoff {
+      display: block;
+      grid-row: 1;
+      height: var(--space-4);
+      position: relative;
+    }
+    /* Traspaso en el mismo carril: flecha vertical */
+    .handoff.same::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      border-left: 1.5px solid var(--text);
+    }
+    /* Traspaso entre carriles: baja desde el origen, cruza y baja al destino */
+    .handoff {
+      --c: calc((100% - (var(--span) - 1) * var(--space-3)) / var(--span) / 2);
+    }
+    .handoff.right::before,
+    .handoff.left::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      height: 50%;
+      left: var(--c);
+      right: var(--c);
+      border-bottom: 1.5px solid var(--text);
+    }
+    .handoff.right::before {
+      border-left: 1.5px solid var(--text);
+    }
+    .handoff.left::before {
+      border-right: 1.5px solid var(--text);
+    }
+    .handoff.right::after,
+    .handoff.left::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      bottom: 0;
+      border-left: 1.5px solid var(--text);
+    }
+    .handoff.right::after {
+      right: var(--c);
+    }
+    .handoff.left::after {
+      left: var(--c);
+    }
+  }
+</style>

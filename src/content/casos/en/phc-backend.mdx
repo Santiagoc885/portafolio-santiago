@@ -1,0 +1,71 @@
+---
+title: Backend development at PHC Servicios Integrados
+mapLabel: PHC · Backend
+summary: "Backend modules and APIs with Python and Django to digitize internal processes that used to be handled manually, in a Scrum team."
+role: Backend Developer
+organization: PHC Servicios Integrados
+period: September 2022 – June 2023
+tools: [Python, Django, SQL, APIs, Git, Scrum]
+type: professional
+category: Software · Backend
+order: 2
+connects: [experiencia, software]
+areas: [software]
+map: { column: 10, row: 2, width: 3, height: 1 }
+---
+
+## Context
+
+Backend Developer in a team of about 3 people working under Scrum. The team built software to support and automate internal business processes through backend modules and data services.
+
+## Problem
+
+Several internal processes required manual handling. They needed to be digitized, with the information centralized and operations easier to run and track.
+
+## My responsibility
+
+- Built 2 backend modules with Python and Django.
+- Built and integrated 2 APIs.
+- Integrated relational databases.
+- Implemented business logic.
+- Collaborative work with Git under Scrum.
+
+## Analysis
+
+Requirements were defined in team meetings and organized as tasks within the Scrum workflow. Features were defined from those needs and their implementation was coordinated with the team.
+
+## Solution
+
+Django backend modules that centralize process information, implement the business logic and expose APIs for integration.
+
+## Architecture
+
+<ArchitectureDiagram
+  title="Django backend"
+  layers={[
+    { label: 'Integration', nodes: ['APIs'] },
+    { label: 'Application', nodes: ['Views', 'Services', 'Models'] },
+    { label: 'Data', nodes: ['Relational database'] },
+  ]}
+  note="Responsibilities separated between models, views and services."
+/>
+
+## Implementation
+
+Business logic was structured inside Django, separating responsibilities between models, views and services to keep the code organized and easy to maintain. I also worked on integrating the backend with relational databases and on building the APIs.
+
+## Validation
+
+Code was peer-reviewed through Git before changes were merged. Functional tests checked that the modules met the requirements.
+
+## Result
+
+<Fact value="2 + 2" label="backend modules and APIs built, in a team of about 3 people" />
+
+The modules digitized processes that used to be handled manually and centralized their information.
+
+## Learnings
+
+I learned to build backend code thinking not only about whether it works, but about how to maintain it, integrate it with databases and adapt it to business needs.
+
+Today I would focus earlier on architecture, automated tests and documentation, to make the system easier to grow and maintain.

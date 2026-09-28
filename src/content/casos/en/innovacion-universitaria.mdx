@@ -1,0 +1,94 @@
+---
+title: University innovation module
+mapLabel: Innovation · USB
+summary: "Django and PostgreSQL module to manage innovation initiatives, with authentication, roles, CRUD, an API and stored procedures."
+role: Software Developer
+organization: Universidad de San Buenaventura Medellín
+period: 2024 – 2026
+tools: [Python, Django, PostgreSQL, APIs, Stored Procedures, Git, Jira, Scrum]
+type: academic
+category: Software + Data
+order: 3
+connects: [proyectos, datos]
+areas: [software, datos]
+map: { column: 1, row: 8, width: 3, height: 1 }
+---
+
+## Context
+
+Academic innovation project at Universidad de San Buenaventura Medellín, built by a team of about 10 people under Scrum, with Jira and Git. This is not work experience.
+
+## Problem
+
+The university needed to centralize and digitize how it managed innovation initiatives: registering, browsing, updating and administering information about ideas and opportunities.
+
+## My responsibility
+
+I focused on the backend with Django and PostgreSQL:
+
+- CRUD features with Class-Based Views.
+- Business logic.
+- Authentication and role-based access control.
+- Integration with the API and with stored procedures.
+
+The rest of the team worked on other backend features, the frontend, integration and testing.
+
+## Analysis
+
+The problem was understood from the project requirements and team meetings. Features were broken down into tasks in Jira to track progress.
+
+## Solution
+
+A Django web module to manage innovation initiatives, with role-restricted access, CRUD operations and data logic backed by stored procedures.
+
+<UserStory
+  as="an authenticated user with an assigned role"
+  want="to access only the features my role allows"
+  so="each profile only manages the information that belongs to it"
+  criteria={[
+    {
+      given: 'I signed in with a role',
+      when: 'I try to open a view that role does not allow',
+      then: 'the system does not give me access to that view',
+    },
+  ]}
+/>
+
+## Architecture
+
+<ArchitectureDiagram
+  title="Innovation module"
+  layers={[
+    { label: 'Presentation', nodes: ['Interface'] },
+    { label: 'Application', nodes: ['Django backend'] },
+    { label: 'Integration', nodes: ['API'] },
+    { label: 'Data', nodes: ['Stored procedures', 'PostgreSQL'] },
+  ]}
+  edges={[
+    ['Interface', 'Django backend'],
+    ['Django backend', 'API'],
+    ['API', 'Stored procedures'],
+    ['Stored procedures', 'PostgreSQL'],
+  ]}
+  note="The response travels back the same way to the interface."
+/>
+
+## Implementation
+
+- **Class-Based Views** to organize CRUD operations in a structured, reusable way.
+- **Stored procedures** to centralize database operations, following the project's technical requirements.
+- Authentication and role permissions inside Django.
+
+## Validation
+
+Functional tests for each feature and checks of the integration between backend, database and interface. The project was also validated through demos and reviews against the requirements.
+
+## Result
+
+A working module to manage innovation initiatives, built and presented as part of the academic program.
+
+## Learnings
+
+I learned to work as a team on a shared codebase, structure backend features, integrate an application with PostgreSQL and implement authentication and role permissions.
+
+Today I would define the architecture, automated tests and API documentation from the start, to reduce integration issues and make maintenance easier.

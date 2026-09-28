@@ -1,0 +1,337 @@
+---
+import { Font } from 'astro:assets';
+import '../styles/global.css';
+import { profile, getText } from '../data/profile';
+import { getLang, useT, paths, translatePath, languages, type Lang } from '../i18n';
+import Logo from '../components/Logo.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const lang = getLang(Astro.currentLocale);
+const t = useT(lang);
+const txt = getText(lang);
+const other: Lang = lang === 'es' ? 'en' : 'es';
+
+const { title, description = txt.description } = Astro.props;
+const year = new Date().getFullYear();
+
+const fullTitle = title ? `${title} · ${profile.shortName}` : `${profile.shortName} · ${txt.title}`;
+const path = Astro.url.pathname.replace(/\/$/, '').replace(/\.html$/, '') || '/';
+const canonical = new URL(path, Astro.site);
+const alternates = (Object.keys(languages) as Lang[]).map((l) => ({
+  lang: l,
+  href: new URL(l === lang ? path : translatePath(path, l), Astro.site).href,
+}));
+const otherPath = translatePath(path, other);
+
+const nav = [
+  { href: paths.section(lang, 'cases'), label: t.nav.cases },
+  { href: paths.section(lang, 'experience'), label: t.nav.experience },
+  { href: paths.about(lang), label: t.nav.about },
+  { href: paths.section(lang, 'contact'), label: t.nav.contact },
+];
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={a.href} />)}
+    <link rel="alternate" hreflang="x-default" href={alternates[0].href} />
+    <script is:inline>
+      // Tema guardado: se aplica antes de pintar para evitar parpadeo.
+      try {
+        const t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch {}
+    </script>
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="theme-color" content="#e6eee9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#111c18" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content={lang === 'es' ? 'es_CO' : 'en_US'} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <Font cssVariable="--font-archivo" preload />
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#contenido">{t.skip}</a>
+    <header class="site-header">
+      <div class="wrap header-inner">
+      <a class="brand" href={paths.home(lang)} aria-label={`${profile.shortName}, ${t.homeLabel}`}>
+        <Logo size="1.375rem" />
+        <span>{profile.shortName}</span>
+      </a>
+      <nav aria-label={t.navLabel}>
+        <ul>
+          {
+            nav.map((n) => (
+              <li>
+                <a href={n.href} aria-current={n.href === path ? 'page' : undefined}>
+                  {n.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+      <div class="controls">
+        <div class="lang-switch" role="group" aria-label={t.langLabel}>
+          {
+            (Object.keys(languages) as Lang[]).map((l, i) => (
+              <>
+                {i > 0 && <span class="sep" aria-hidden="true">/</span>}
+                {l === lang ? (
+                  <span class="current" aria-current="true">{l.toUpperCase()}</span>
+                ) : (
+                  <a href={otherPath} hreflang={l} lang={l} aria-label={t.switchTo}>
+                    {l.toUpperCase()}
+                  </a>
+                )}
+              </>
+            ))
+          }
+        </div>
+        <button class="theme-toggle" type="button" aria-pressed="false" data-theme-toggle>
+          <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" />
+          </svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" />
+          </svg>
+          <span class="sr-only">{t.themeDark}</span>
+        </button>
+      </div>
+      </div>
+    </header>
+
+    <main id="contenido" tabindex="-1">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap footer-base">
+        <p class="copyright">
+          <Logo size="1.25rem" />
+          <small>© {year} {profile.name}. {t.rights}</small>
+        </p>
+        <a class="to-top" href="#top">{t.backToTop} <span aria-hidden="true">↑</span></a>
+      </div>
+    </footer>
+    <script is:inline>
+      // Botón de tema: alterna claro/oscuro y recuerda la elección. Sin elección, sigue al sistema.
+      (() => {
+        const root = document.documentElement;
+        const btn = document.querySelector('[data-theme-toggle]');
+        const mq = matchMedia('(prefers-color-scheme: dark)');
+        const isDark = () => (root.dataset.theme ? root.dataset.theme === 'dark' : mq.matches);
+        const sync = () => btn.setAttribute('aria-pressed', String(isDark()));
+        sync();
+        mq.addEventListener('change', sync);
+        btn.addEventListener('click', () => {
+          const next = isDark() ? 'light' : 'dark';
+          root.dataset.theme = next;
+          try {
+            localStorage.setItem('theme', next);
+          } catch {}
+          sync();
+        });
+      })();
+    </script>
+  </body>
+</html>
+
+<style>
+  /* Barra fija: se mantiene visible al hacer scroll */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    view-transition-name: site-header;
+  }
+  .header-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-1) var(--space-3);
+    padding-block: 0.625rem;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-weight: 680;
+    font-stretch: 96%;
+    text-decoration: none;
+    min-height: 2.75rem;
+  }
+  .site-header nav {
+    margin-left: auto;
+  }
+  .site-header nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .site-header nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-weight: 540;
+    text-decoration: none;
+    color: var(--text-2);
+  }
+  .site-header nav a:hover,
+  .site-header nav a[aria-current='page'] {
+    color: var(--text);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-decoration-color: var(--accent);
+    text-underline-offset: 0.35em;
+  }
+  /* Controles de idioma y tema: solo texto e icono, sin cajas */
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  /* Móvil: idioma y tema junto al logo; la navegación pasa a su propia fila */
+  @media (max-width: 47.99rem) {
+    .controls {
+      order: 2;
+      margin-left: auto;
+    }
+    .site-header nav {
+      order: 3;
+      flex-basis: 100%;
+      margin-left: 0;
+    }
+  }
+  @media (min-width: 48rem) {
+    .controls {
+      padding-left: var(--space-3);
+      border-left: 1px solid var(--line);
+    }
+  }
+  .lang-switch {
+    display: flex;
+    align-items: center;
+    gap: 0.125rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-stretch: 110%;
+    letter-spacing: 0.06em;
+  }
+  .lang-switch > * {
+    display: inline-grid;
+    place-items: center;
+    min-width: 2rem;
+    min-height: 2.75rem;
+  }
+  .lang-switch > .sep {
+    min-width: 0;
+    color: var(--line-strong);
+    font-weight: 400;
+  }
+  .lang-switch .current {
+    color: var(--text);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-decoration-color: var(--accent);
+    text-underline-offset: 0.45em;
+  }
+  .lang-switch a {
+    color: var(--text-2);
+    text-decoration: none;
+  }
+  .lang-switch a:hover {
+    color: var(--text);
+  }
+  .theme-toggle {
+    display: inline-grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--text-2);
+    cursor: pointer;
+  }
+  .theme-toggle:hover {
+    color: var(--text);
+  }
+  .theme-toggle svg {
+    width: 1.125rem;
+    height: 1.125rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  /* Muestra el icono del tema al que se cambiará */
+  .theme-toggle .icon-sun,
+  .theme-toggle[aria-pressed='true'] .icon-moon {
+    display: none;
+  }
+  .theme-toggle[aria-pressed='true'] .icon-sun {
+    display: block;
+  }
+  main:focus {
+    outline: none;
+  }
+  .site-footer {
+    margin-top: var(--space-6);
+    border-top: 1px solid var(--line);
+  }
+  .footer-base {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-4);
+    padding-block: var(--space-4);
+    font-size: 0.875rem;
+  }
+  .copyright {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    max-width: none;
+  }
+  .copyright small {
+    font-size: inherit;
+  }
+  .to-top {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2.75rem;
+    color: var(--text-2);
+    text-decoration: none;
+    font-weight: 560;
+  }
+  .to-top:hover {
+    color: var(--text);
+  }
+</style>

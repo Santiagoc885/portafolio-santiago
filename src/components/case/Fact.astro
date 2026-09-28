@@ -1,0 +1,29 @@
+---
+/** Dato confirmado aislado (sin comparación antes/después). */
+interface Props {
+  value: string;
+  label: string;
+}
+const { value, label } = Astro.props;
+---
+
+<p class="fact"><strong>{value}</strong> <span>{label}</span></p>
+
+<style>
+  .fact {
+    display: grid;
+    gap: 0.125rem;
+    margin: var(--space-4) 0;
+    padding-left: var(--space-3);
+    border-left: 3px solid var(--accent);
+  }
+  strong {
+    font-size: 2rem;
+    font-weight: 740;
+    font-stretch: 90%;
+    line-height: 1.1;
+  }
+  span {
+    color: var(--text-2);
+  }
+</style>

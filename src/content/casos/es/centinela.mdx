@@ -1,0 +1,95 @@
+---
+title: Centinela
+mapLabel: Centinela
+summary: "Prototipo sobre Azure para detectar transacciones sospechosas con una arquitectura orientada a eventos: API, Service Bus, Functions y Cosmos DB."
+role: Desarrollo de infraestructura y backend
+period: "2026"
+tools: [Azure, Bicep, Azure Functions, Service Bus, Cosmos DB, Blob Storage, Static Web Apps]
+type: training
+typeLabel: Formación (Riwi)
+category: Cloud + Data + AI
+status: Prototipo funcional en desarrollo
+order: 7
+connects: [proyectos]
+areas: [datos, ai]
+map: { column: 10, row: 10, width: 3, height: 1 }
+---
+
+## Contexto
+
+Proyecto de Riwi (2026) enfocado en servicios cloud y arquitectura sobre Azure. Quedó como un prototipo funcional en desarrollo, centrado en demostrar la arquitectura de detección y el flujo de procesamiento de transacciones.
+
+## Problema
+
+Detectar transacciones potencialmente sospechosas que puedan requerir una revisión adicional.
+
+## Mi responsabilidad
+
+Participé en el desarrollo de la solución, principalmente en los componentes de infraestructura y backend sobre Azure: API, Blob Storage, Service Bus, Azure Functions, Cosmos DB y los mecanismos de identidad y permisos.
+
+## Análisis
+
+La detección se planteó con reglas y un umbral de riesgo: cada transacción recibe un puntaje y las que superan el umbral se marcan como potencialmente sospechosas.
+
+## Solución
+
+Una arquitectura orientada a eventos: la API recibe la transacción y la publica en una cola de Service Bus; una Azure Function procesa el mensaje, aplica la lógica de detección y guarda el resultado en Cosmos DB para su consulta y seguimiento.
+
+## Arquitectura
+
+<ProcessMap
+  title="Recorrido de una transacción"
+  lanes={['Cliente', 'API', 'Service Bus', 'Azure Function', 'Cosmos DB']}
+  steps={[
+    { lane: 'Cliente', label: 'Envía la transacción' },
+    { lane: 'API', label: 'Recibe la transacción y la publica en la cola' },
+    { lane: 'Service Bus', label: 'Encola el mensaje' },
+    { lane: 'Azure Function', label: 'Procesa el mensaje y calcula el riesgo' },
+    { lane: 'Cosmos DB', label: 'Guarda el resultado para consulta y seguimiento' },
+  ]}
+/>
+
+<ArchitectureDiagram
+  title="Servicios de Azure"
+  layers={[
+    { label: 'Frontend', nodes: ['Static Web Apps'] },
+    { label: 'Cómputo', nodes: ['API', 'Azure Functions'] },
+    { label: 'Mensajería', nodes: ['Service Bus'] },
+    { label: 'Datos', nodes: ['Blob Storage', 'Cosmos DB'] },
+  ]}
+  edges={[
+    ['API', 'Service Bus'],
+    ['Service Bus', 'Azure Functions'],
+    ['Azure Functions', 'Cosmos DB'],
+  ]}
+  crossCutting={[
+    { label: 'Seguridad', nodes: ['RBAC', 'Managed Identity', 'VNet'] },
+    { label: 'Configuración', nodes: ['App Configuration'] },
+    { label: 'IaC', nodes: ['Bicep'] },
+  ]}
+/>
+
+## Implementación
+
+- Infraestructura como código con Bicep.
+- Comunicación desacoplada mediante Service Bus.
+- Acceso entre servicios con Managed Identity y RBAC.
+- Red con Virtual Network.
+- Configuración centralizada con App Configuration.
+- Blob Storage como almacenamiento de apoyo.
+
+## Validación
+
+Se enviaron transacciones de prueba y se comprobó el flujo completo entre los servicios: que cada transacción se recibiera, se procesara y se almacenara correctamente.
+
+## Resultado
+
+<Fact value="60" label="umbral de riesgo a partir del cual una transacción se considera potencialmente sospechosa" />
+
+El flujo de extremo a extremo funciona en el prototipo. No se reporta una tasa de detección ni de precisión: haría falta una evaluación formal con datos etiquetados.
+
+## Aprendizajes
+
+Aprendí a diseñar una arquitectura orientada a eventos con servicios administrados de Azure, teniendo en cuenta seguridad, escalabilidad y desacoplamiento entre componentes.
+
+Hoy trabajaría desde el principio con un conjunto de datos de prueba más representativo y con métricas formales de detección, como precisión, recall y falsos positivos.

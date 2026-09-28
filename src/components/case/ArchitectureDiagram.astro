@@ -1,0 +1,257 @@
+---
+/**
+ * Diagrama de arquitectura en SVG, generado desde datos.
+ * - `layers`: filas de arriba abajo, cada una con sus componentes.
+ * - `edges`: conexiones confirmadas entre componentes (por nombre). Si se omiten,
+ *   solo se dibuja la relación entre capas, sin afirmar un flujo concreto.
+ * - `crossCutting`: capacidades transversales (seguridad, IaC, configuración).
+ * Accesible: role="img" con <title>/<desc> + descripción textual equivalente.
+ */
+import { getLang, useT } from '../../i18n';
+
+interface Layer {
+  label: string;
+  nodes: string[];
+}
+interface Props {
+  title: string;
+  layers: Layer[];
+  edges?: [string, string][];
+  crossCutting?: Layer[];
+  note?: string;
+}
+const { title, layers, edges, crossCutting = [], note } = Astro.props;
+const t = useT(getLang(Astro.currentLocale));
+
+const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+const W = 720;
+const LABEL_W = 116;
+const SIDE_W = crossCutting.length ? 176 : 0;
+const GAP = 16;
+const ROW_H = 96;
+const NODE_H = 48;
+const innerW = W - LABEL_W - (SIDE_W ? SIDE_W + GAP : 0);
+const H = layers.length * ROW_H;
+
+type Pos = { x: number; y: number; w: number; h: number; label: string };
+const positions = new Map<string, Pos>();
+layers.forEach((layer, r) => {
+  const n = layer.nodes.length;
+  const w = Math.min(200, (innerW - GAP * (n - 1)) / n);
+  const total = n * w + GAP * (n - 1);
+  const x0 = LABEL_W + (innerW - total) / 2;
+  layer.nodes.forEach((label, i) => {
+    positions.set(label, { x: x0 + i * (w + GAP), y: r * ROW_H + (ROW_H - NODE_H) / 2, w, h: NODE_H, label });
+  });
+});
+
+const edgePaths = (edges ?? []).map(([a, b]) => {
+  const p = positions.get(a);
+  const q = positions.get(b);
+  if (!p || !q) throw new Error(`ArchitectureDiagram: componente desconocido en arista ${a} → ${b}`);
+  const down = q.y > p.y;
+  const x1 = p.x + p.w / 2;
+  const x2 = q.x + q.w / 2;
+  if (p.y === q.y) {
+    const right = q.x > p.x;
+    const sx = right ? p.x + p.w : p.x;
+    const ex = right ? q.x : q.x + q.w;
+    const y = p.y + p.h / 2;
+    return { d: `M${sx} ${y}H${ex}`, a, b };
+  }
+  const y1 = down ? p.y + p.h : p.y;
+  const y2 = down ? q.y : q.y + q.h;
+  const my = (y1 + y2) / 2;
+  return { d: `M${x1} ${y1}V${my}H${x2}V${y2}`, a, b };
+});
+
+// Sin aristas confirmadas: una única guía entre capas, discontinua.
+const spine = !edges && layers.length > 1 ? `M${LABEL_W + innerW / 2} ${ROW_H / 2}V${H - ROW_H / 2}` : null;
+
+const sideX = W - SIDE_W;
+const sideRowH = crossCutting.length ? H / crossCutting.length : 0;
+
+const desc = [
+  ...layers.map((l) => `${l.label}: ${l.nodes.join(', ')}.`),
+  ...(edges?.length ? [`${t.connections}: ${edges.map(([a, b]) => `${a} ${t.towards} ${b}`).join('; ')}.`] : []),
+  ...crossCutting.map((l) => `${t.crossCutting}, ${l.label}: ${l.nodes.join(', ')}.`),
+].join(' ');
+---
+
+<figure class="arch">
+  <figcaption>
+    <span class="label">{t.architecture}</span>
+    <span class="title">{title}</span>
+  </figcaption>
+  <div class="scroll">
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby={`${slug}-t ${slug}-d`}>
+      <title id={`${slug}-t`}>{title}</title>
+      <desc id={`${slug}-d`}>{desc}</desc>
+      <defs>
+        <marker id={`${slug}-arrow`} viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M0 0L8 4L0 8z" class="arrow-head"></path>
+        </marker>
+      </defs>
+
+      {
+        layers.map((l, r) => (
+          <g>
+            {r > 0 && <path class="row-rule" d={`M0 ${r * ROW_H}H${LABEL_W + innerW}`} />}
+            <text class="layer-label" x="0" y={r * ROW_H + ROW_H / 2} dominant-baseline="middle">
+              {l.label}
+            </text>
+          </g>
+        ))
+      }
+
+      {spine && <path class="spine" d={spine} />}
+      {edgePaths.map((e) => <path class="edge" d={e.d} marker-end={`url(#${slug}-arrow)`} />)}
+
+      {
+        [...positions.values()].map((p) => (
+          <g>
+            <rect class="node" x={p.x} y={p.y} width={p.w} height={p.h} />
+            <text class="node-label" x={p.x + p.w / 2} y={p.y + p.h / 2} dominant-baseline="middle" text-anchor="middle">
+              {p.label}
+            </text>
+          </g>
+        ))
+      }
+
+      {
+        crossCutting.map((l, i) => (
+          <g>
+            <rect class="side" x={sideX} y={i * sideRowH + 8} width={SIDE_W} height={sideRowH - 16} />
+            <text class="side-title" x={sideX + 12} y={i * sideRowH + 32}>
+              {l.label}
+            </text>
+            {l.nodes.map((n, j) => (
+              <text class="side-item" x={sideX + 12} y={i * sideRowH + 54 + j * 19}>
+                {n}
+              </text>
+            ))}
+          </g>
+        ))
+      }
+    </svg>
+  </div>
+  <details class="text-alt">
+    <summary>{t.diagramText}</summary>
+    <ul>
+      {
+        layers.map((l) => (
+          <li>
+            <b>{l.label}:</b> {l.nodes.join(', ')}
+          </li>
+        ))
+      }
+      {
+        edges?.map(([a, b]) => (
+          <li>
+            {a} → {b}
+          </li>
+        ))
+      }
+      {
+        crossCutting.map((l) => (
+          <li>
+            <b>{t.crossCutting} · {l.label}:</b> {l.nodes.join(', ')}
+          </li>
+        ))
+      }
+    </ul>
+  </details>
+  {note && <p class="note muted">{note}</p>}
+</figure>
+
+<style>
+  .arch {
+    margin: var(--space-5) 0;
+    display: grid;
+    gap: var(--space-3);
+  }
+  figcaption {
+    display: grid;
+    gap: 0.125rem;
+  }
+  .title {
+    font-weight: 650;
+  }
+  .scroll {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    padding: var(--space-3);
+  }
+  svg {
+    min-width: 36rem;
+    width: 100%;
+    height: auto;
+    font-family: var(--font);
+  }
+  .row-rule {
+    stroke: var(--line);
+    stroke-width: 1;
+  }
+  .layer-label {
+    fill: var(--text-2);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .node {
+    fill: var(--bg);
+    stroke: var(--text);
+    stroke-width: 1.5;
+  }
+  .node-label {
+    fill: var(--text);
+    font-size: 14px;
+    font-weight: 580;
+  }
+  .edge {
+    fill: none;
+    stroke: var(--text);
+    stroke-width: 1.5;
+  }
+  .arrow-head {
+    fill: var(--text);
+  }
+  .spine {
+    stroke: var(--line-strong);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 4;
+  }
+  .side {
+    fill: none;
+    stroke: var(--line-strong);
+    stroke-dasharray: 4 3;
+  }
+  .side-title {
+    fill: var(--text);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .side-item {
+    fill: var(--text-2);
+    font-size: 13px;
+  }
+  .text-alt summary {
+    cursor: pointer;
+    font-size: 0.9375rem;
+    color: var(--text-2);
+    min-height: 2.75rem;
+    display: flex;
+    align-items: center;
+  }
+  .text-alt ul {
+    padding-left: 1.25rem;
+    display: grid;
+    gap: var(--space-1);
+  }
+  .note {
+    font-size: 0.875rem;
+  }
+</style>

@@ -1,0 +1,95 @@
+---
+title: Centinela
+mapLabel: Centinela
+summary: "Azure prototype to detect suspicious transactions with an event-driven architecture: API, Service Bus, Functions and Cosmos DB."
+role: Infrastructure and backend development
+period: "2026"
+tools: [Azure, Bicep, Azure Functions, Service Bus, Cosmos DB, Blob Storage, Static Web Apps]
+type: training
+typeLabel: Training (Riwi)
+category: Cloud + Data + AI
+status: Working prototype in development
+order: 7
+connects: [proyectos]
+areas: [datos, ai]
+map: { column: 10, row: 10, width: 3, height: 1 }
+---
+
+## Context
+
+Riwi project (2026) focused on cloud services and architecture on Azure. It remains a working prototype in development, centered on demonstrating the detection architecture and the transaction processing flow.
+
+## Problem
+
+Detect potentially suspicious transactions that may need additional review.
+
+## My responsibility
+
+I took part in building the solution, mainly the infrastructure and backend components on Azure: API, Blob Storage, Service Bus, Azure Functions, Cosmos DB and the identity and permission mechanisms.
+
+## Analysis
+
+Detection was based on rules and a risk threshold: each transaction gets a score, and those above the threshold are flagged as potentially suspicious.
+
+## Solution
+
+An event-driven architecture: the API receives the transaction and publishes it to a Service Bus queue; an Azure Function processes the message, applies the detection logic and stores the result in Cosmos DB for querying and follow-up.
+
+## Architecture
+
+<ProcessMap
+  title="Path of a transaction"
+  lanes={['Client', 'API', 'Service Bus', 'Azure Function', 'Cosmos DB']}
+  steps={[
+    { lane: 'Client', label: 'Sends the transaction' },
+    { lane: 'API', label: 'Receives the transaction and publishes it to the queue' },
+    { lane: 'Service Bus', label: 'Queues the message' },
+    { lane: 'Azure Function', label: 'Processes the message and computes the risk' },
+    { lane: 'Cosmos DB', label: 'Stores the result for querying and follow-up' },
+  ]}
+/>
+
+<ArchitectureDiagram
+  title="Azure services"
+  layers={[
+    { label: 'Frontend', nodes: ['Static Web Apps'] },
+    { label: 'Compute', nodes: ['API', 'Azure Functions'] },
+    { label: 'Messaging', nodes: ['Service Bus'] },
+    { label: 'Data', nodes: ['Blob Storage', 'Cosmos DB'] },
+  ]}
+  edges={[
+    ['API', 'Service Bus'],
+    ['Service Bus', 'Azure Functions'],
+    ['Azure Functions', 'Cosmos DB'],
+  ]}
+  crossCutting={[
+    { label: 'Security', nodes: ['RBAC', 'Managed Identity', 'VNet'] },
+    { label: 'Configuration', nodes: ['App Configuration'] },
+    { label: 'IaC', nodes: ['Bicep'] },
+  ]}
+/>
+
+## Implementation
+
+- Infrastructure as code with Bicep.
+- Decoupled communication through Service Bus.
+- Service-to-service access with Managed Identity and RBAC.
+- Networking with Virtual Network.
+- Centralized configuration with App Configuration.
+- Blob Storage as supporting storage.
+
+## Validation
+
+Test transactions were sent to check the full flow across services: that each transaction was received, processed and stored correctly.
+
+## Result
+
+<Fact value="60" label="risk threshold above which a transaction is considered potentially suspicious" />
+
+The end-to-end flow works in the prototype. No detection or precision rate is reported: that would require a formal evaluation with labeled data.
+
+## Learnings
+
+I learned to design an event-driven architecture with managed Azure services, taking security, scalability and decoupling between components into account.
+
+Today I would start with a more representative test dataset and formal detection metrics, such as precision, recall and false positives.

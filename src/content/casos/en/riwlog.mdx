@@ -1,0 +1,92 @@
+---
+title: Riwlog / Riwlogic
+mapLabel: Riwlog
+summary: "Programming competition platform that records the solving process and classifies whether behavior is human, AI-generated or AI-assisted."
+role: Full Stack Developer
+period: "2026"
+tools: [Node.js, Express, FastAPI, PostgreSQL, JavaScript, HTML, CSS, AI]
+type: personal
+typeLabel: Personal / Training
+category: Software + AI
+status: Working prototype in development
+order: 4
+connects: [proyectos, ai, software]
+areas: [software, ai]
+map: { column: 10, row: 8, width: 3, height: 1 }
+---
+
+## Context
+
+Riwi project (2026): a platform for programming competitions. It remains a working prototype in development, with the main components implemented and ready for further testing and classifier improvements.
+
+## Problem
+
+Programming competitions usually evaluate only the final result, which does not show how the solution was reached or whether AI assistance was involved.
+
+## My responsibility
+
+I worked as a Full Stack Developer, mainly on the backend and on the integration with the classification service:
+
+- Architecture design.
+- Recording participant events.
+- Database integration.
+- Communication between the main backend and the classification service.
+
+## Analysis
+
+The solving process leaves traces in concrete actions: typing, pasting, deleting and running code. Using that process as an additional signal, not only the final code, helps identify possible patterns of AI assistance.
+
+<UserStory
+  as="an evaluator of a programming competition"
+  want="to see the events of each participant's solving process"
+  so="I can also evaluate the development process, not only the final result"
+  criteria={[
+    {
+      given: 'a participant is solving a challenge',
+      when: 'they type, paste, delete or run code',
+      then: 'the action is recorded as a process event',
+    },
+  ]}
+/>
+
+## Solution
+
+Two separate services: one records the process events and the other classifies them to determine whether the behavior is mainly human, AI-generated or AI-assisted.
+
+## Architecture
+
+<ProcessMap
+  title="From event to classification"
+  lanes={['Participant', 'Node.js / Express', 'PostgreSQL', 'FastAPI']}
+  steps={[
+    { lane: 'Participant', label: 'Types, pastes, deletes and runs code' },
+    { lane: 'Node.js / Express', label: 'Receives and records each event' },
+    { lane: 'PostgreSQL', label: 'Stores users, sessions, problems and events' },
+    { lane: 'FastAPI', label: 'Analyzes the events: human, AI-generated or AI-assisted' },
+  ]}
+/>
+
+## Implementation
+
+- **Node.js / Express** receives and records the events from the participant's interaction.
+- **FastAPI** exposes the classification service.
+- **PostgreSQL** stores users, sessions, problems and events.
+- The classifier uses typing, pasting, deleting and running events as variables, along with the frequency and time between events.
+
+## Validation
+
+For event recording, each user action was tested to verify that every event reached the backend and was stored.
+
+Classification was validated with different interaction scenarios, comparing the expected behavior with the classifier's output. That validation also showed which parts needed more data and tuning.
+
+## Result
+
+A working prototype that validates the architecture and the idea of analyzing behavior during problem solving.
+
+There is no formal precision metric for the classifier yet: reporting one would require an evaluation with a labeled dataset.
+
+## Learnings
+
+I learned to design an architecture with separate services and to integrate a traditional backend with a specialized AI service. A reliable classifier does not depend only on the model: it needs a good strategy for collecting, labeling and validating data.
+
+Today I would define the event schema from the start, build a labeled dataset and set metrics such as precision, recall and a confusion matrix before evaluating the classifier.

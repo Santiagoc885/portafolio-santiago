@@ -1,0 +1,271 @@
+---
+/** Página de caso, compartida por /casos/[slug] y /en/cases/[slug]. */
+import { render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Pending from '../components/Pending.astro';
+import UserStory from '../components/case/UserStory.astro';
+import Metric from '../components/case/Metric.astro';
+import Fact from '../components/case/Fact.astro';
+import ProcessMap from '../components/case/ProcessMap.astro';
+import ArchitectureDiagram from '../components/case/ArchitectureDiagram.astro';
+import { typeLabels } from '../data/profile';
+import { caseAxes, hubLabel, primaryAxis } from '../data/map';
+import { getLang, useT, isPendingValue, paths } from '../i18n';
+import type { Case } from '../lib/cases';
+
+interface Props {
+  entry: Case;
+  prev?: Case;
+  next?: Case;
+}
+
+const { entry, prev, next } = Astro.props;
+const lang = getLang(Astro.currentLocale);
+const t = useT(lang);
+const { Content, headings } = await render(entry);
+const d = entry.data;
+const sections = headings.filter((h) => h.depth === 2);
+
+const facts: { key: keyof typeof t.facts; v?: string }[] = [
+  { key: 'type', v: d.typeLabel ?? typeLabels[lang][d.type] },
+  { key: 'org', v: d.organization },
+  { key: 'role', v: d.role },
+  { key: 'period', v: d.period },
+  { key: 'category', v: d.category },
+  { key: 'status', v: d.status },
+];
+---
+
+<Base title={d.title} description={d.summary}>
+  <article class={`case wrap axis-${primaryAxis(d.areas)}`}>
+    <header class="case-head">
+      <p><a class="back" href={paths.section(lang, 'cases')}>{t.back}</a></p>
+      <p class="label">{typeLabels[lang][d.type]}</p>
+      <ul class="axis-chips" aria-label={t.caseAxes}>
+        {caseAxes(d.areas, d.type).map((a) => <li class={`axis-${a}`}>{hubLabel(a, lang)}</li>)}
+      </ul>
+      <h1 style={`view-transition-name:caso-${entry.slug}`}>{d.title}</h1>
+      <p class="lede">{d.summary}</p>
+
+      <dl class="facts">
+        {
+          facts
+            .filter((f) => (f.key !== 'org' && f.key !== 'status') || f.v)
+            .map((f) => (
+              <div>
+                <dt class="label">{t.facts[f.key]}</dt>
+                <dd>{isPendingValue(f.v) ? <Pending what={t.facts[f.key]} /> : f.v}</dd>
+              </div>
+            ))
+        }
+        <div class="facts-tools">
+          <dt class="label">{t.technologies}</dt>
+          <dd>
+            <ul class="tags">{d.tools.map((t) => <li>{t}</li>)}</ul>
+          </dd>
+        </div>
+      </dl>
+    </header>
+
+    <div class="case-body">
+      <nav class="toc" aria-label={t.caseSections}>
+        <p class="label">{t.inThisCase}</p>
+        <ol role="list">
+          {
+            sections.map((h) => (
+              <li>
+                <a href={`#${h.slug}`}>{h.text}</a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+
+      <div class="prose">
+        <Content components={{ Pending, UserStory, Metric, Fact, ProcessMap, ArchitectureDiagram }} />
+      </div>
+    </div>
+
+    <nav class="pager" aria-label={t.otherCases}>
+      {
+        prev ? (
+          <a href={paths.case(lang, prev.slug)} rel="prev">
+            <span class="label">{t.prev}</span>
+            <span>{prev.data.title}</span>
+          </a>
+        ) : (
+          <span />
+        )
+      }
+      {
+        next && (
+          <a class="next" href={paths.case(lang, next.slug)} rel="next">
+            <span class="label">{t.next}</span>
+            <span>{next.data.title}</span>
+          </a>
+        )
+      }
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .case {
+    padding-block: var(--space-5) var(--space-7);
+  }
+  .case-head {
+    display: grid;
+    gap: var(--space-3);
+    padding-bottom: var(--space-5);
+  }
+  .back {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-weight: 560;
+    text-decoration: none;
+    color: var(--text-2);
+  }
+  .back:hover {
+    color: var(--text);
+    text-decoration: underline;
+  }
+  h1 {
+    font-size: clamp(2.25rem, 6vw, 4rem);
+    max-width: 20ch;
+  }
+  .lede {
+    font-size: clamp(1.125rem, 2vw, 1.375rem);
+    line-height: 1.45;
+    max-width: 52ch;
+  }
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: 0;
+    margin-top: var(--space-4);
+    border-top: 3px solid var(--axis);
+  }
+  .facts div {
+    display: grid;
+    gap: var(--space-1);
+    align-content: start;
+    padding: var(--space-3) var(--space-3) var(--space-3) 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .facts dd {
+    margin: 0;
+    font-weight: 560;
+  }
+  .facts .facts-tools {
+    grid-column: 1 / -1;
+  }
+
+  .case-body {
+    display: grid;
+    gap: var(--space-5);
+    padding-top: var(--space-5);
+  }
+  .toc ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    margin-top: var(--space-2);
+    padding: 0;
+    list-style: none;
+    font-size: 0.9375rem;
+  }
+  .toc a {
+    color: var(--text-2);
+    text-decoration: none;
+  }
+  .toc a:hover {
+    color: var(--axis);
+    text-decoration: underline;
+  }
+
+  /* Contenido narrativo del MDX */
+  .prose {
+    min-width: 0;
+    max-width: 46rem;
+  }
+  .prose :global(h2) {
+    margin: var(--space-6) 0 var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--line);
+    font-size: 1.5rem;
+    position: relative;
+    scroll-margin-top: var(--space-4);
+  }
+  .prose :global(h2)::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    width: 2.5rem;
+    border-top: 3px solid var(--axis);
+  }
+  .prose :global(h2:first-child) {
+    margin-top: 0;
+  }
+  .prose :global(p + p),
+  .prose :global(p + ul),
+  .prose :global(ul + p) {
+    margin-top: var(--space-3);
+  }
+  .prose > :global(ul) {
+    display: grid;
+    gap: var(--space-1);
+    padding-left: 1.125rem;
+  }
+  .prose :global(li::marker) {
+    color: var(--text-2);
+  }
+
+  .pager {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-7);
+    border-top: 1px solid var(--line-strong);
+    padding-top: var(--space-4);
+  }
+  .pager a {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-3);
+    border: 1px solid var(--line-strong);
+    text-decoration: none;
+    font-weight: 620;
+  }
+  .pager a:hover,
+  .pager a:focus-visible {
+    border-color: var(--text);
+    background: var(--surface);
+  }
+
+  @media (min-width: 48rem) {
+    .pager {
+      grid-template-columns: 1fr 1fr;
+    }
+    .pager .next {
+      text-align: right;
+    }
+  }
+  @media (min-width: 64rem) {
+    .case-body {
+      grid-template-columns: 13rem 1fr;
+      gap: var(--space-6);
+    }
+    .toc {
+      position: sticky;
+      top: var(--space-4);
+      align-self: start;
+    }
+    .toc ol {
+      display: grid;
+      gap: var(--space-2);
+      padding-left: var(--space-3);
+      border-left: 1px solid var(--line);
+    }
+  }
+</style>

@@ -1,0 +1,81 @@
+---
+title: Software assets and Business Intelligence at Grupo ISA / XM
+mapLabel: ISA / XM · BI
+summary: "Power BI dashboards and Python analysis of software assets and licenses to identify unused or underused licenses."
+role: Software Asset Management / Business Intelligence Intern
+organization: Grupo ISA / XM
+period: July 2023 – January 2024
+tools: [Power BI, Python, Pandas, SharePoint, Excel, Service Desk]
+type: professional
+category: Data + BI
+order: 1
+connects: [experiencia, datos]
+areas: [datos]
+map: { column: 1, row: 2, width: 3, height: 1 }
+---
+
+## Context
+
+Hybrid internship in software asset management (Software Asset Management), focused on Business Intelligence.
+
+## Problem
+
+License reports were mostly prepared by hand in Excel, gathering and consolidating the information periodically. Each update took about a day of repetitive work to consolidate and validate the data.
+
+The team also needed to identify which licenses were unused or underused to support decisions about those assets.
+
+## My responsibility
+
+- Build dashboards in Power BI.
+- Process and analyze asset and license data with Python.
+- Automate the periodic reports.
+- Identify unused or underused licenses.
+- Support the analysis behind decisions on software assets.
+
+## Analysis
+
+The work covered more than 10,000 asset and license records, taken mainly from SharePoint, where licensing information was centralized.
+
+To decide whether a license was underused, its level of usage and recorded activity was compared against the assigned license.
+
+## Solution
+
+An automated Python and Pandas flow that extracts, cleans and consolidates license data, plus Power BI dashboards to review the state of assets and licenses.
+
+## Architecture
+
+<ProcessMap
+  title="From records to license decisions"
+  lanes={['SharePoint', 'Python', 'Power BI', 'Decision']}
+  steps={[
+    { lane: 'SharePoint', label: 'Centralized license information (more than 10,000 records)' },
+    { lane: 'Python', label: 'Extraction, cleaning and analysis with Pandas' },
+    { lane: 'Python', label: 'Automated generation of periodic reports' },
+    { lane: 'Power BI', label: 'Asset and license dashboards' },
+    { lane: 'Decision', label: 'Licenses with little or no use, candidates for reassignment or release' },
+  ]}
+/>
+
+## Implementation
+
+- Pandas for data manipulation and analysis.
+- Periodic reports to make updating and tracking licenses easier.
+- Totals and records checked after every update.
+
+## Validation
+
+Results were compared against the original data in SharePoint, and the indicators were reviewed with the responsible team. After every update, totals and records were checked to match.
+
+## Result
+
+<Metric label="Time to prepare a report" beforeText="1 day" afterText="3 hours" />
+
+<Fact value="10,000+" label="software asset and license records analyzed" />
+
+The analysis identified licenses with little or no use that could be reviewed for reassignment or release, giving the team concrete opportunities to optimize licensing spend.
+
+## Learnings
+
+I learned to work with real data end to end: extraction, cleaning, analysis and visualization in Power BI. I also learned that data quality has to be validated before presenting indicators.
+
+Today I would design the process for automation, traceability and reuse of the data flow from the start.

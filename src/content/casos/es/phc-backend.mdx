@@ -1,0 +1,71 @@
+---
+title: Desarrollo backend en PHC Servicios Integrados
+mapLabel: PHC · Backend
+summary: "Módulos backend y APIs con Python y Django para digitalizar procesos internos que antes se gestionaban a mano, en un equipo bajo Scrum."
+role: Backend Developer
+organization: PHC Servicios Integrados
+period: Septiembre 2022 – Junio 2023
+tools: [Python, Django, SQL, APIs, Git, Scrum]
+type: professional
+category: Software · Backend
+order: 2
+connects: [experiencia, software]
+areas: [software]
+map: { column: 10, row: 2, width: 3, height: 1 }
+---
+
+## Contexto
+
+Rol de Backend Developer en un equipo de unas 3 personas bajo Scrum. El equipo desarrollaba soluciones de software para apoyar y automatizar procesos internos del negocio mediante módulos backend y servicios de datos.
+
+## Problema
+
+Varios procesos internos requerían gestión manual. Hacía falta digitalizarlos, centralizar la información y facilitar la ejecución y el seguimiento de las operaciones.
+
+## Mi responsabilidad
+
+- Desarrollo de 2 módulos backend con Python y Django.
+- Desarrollo e integración de 2 APIs.
+- Integración con bases de datos relacionales.
+- Implementación de lógica de negocio.
+- Trabajo colaborativo con Git bajo Scrum.
+
+## Análisis
+
+Los requerimientos se definían en reuniones con el equipo y se organizaban como tareas dentro del flujo de Scrum. A partir de esas necesidades se definían las funcionalidades y se coordinaba su implementación.
+
+## Solución
+
+Módulos backend en Django que centralizan la información de los procesos, implementan la lógica de negocio y exponen APIs para su integración.
+
+## Arquitectura
+
+<ArchitectureDiagram
+  title="Backend en Django"
+  layers={[
+    { label: 'Integración', nodes: ['APIs'] },
+    { label: 'Aplicación', nodes: ['Vistas', 'Servicios', 'Modelos'] },
+    { label: 'Datos', nodes: ['Base de datos relacional'] },
+  ]}
+  note="Separación de responsabilidades entre modelos, vistas y servicios."
+/>
+
+## Implementación
+
+La lógica de negocio se estructuró dentro de Django separando responsabilidades entre modelos, vistas y servicios, para mantener el código organizado y fácil de mantener. También trabajé en la integración del backend con bases de datos relacionales y en el desarrollo de las APIs.
+
+## Validación
+
+El código se revisaba entre compañeros con Git antes de integrar los cambios. Además se hacían pruebas funcionales para verificar que los módulos cumplieran los requerimientos.
+
+## Resultado
+
+<Fact value="2 + 2" label="módulos backend y APIs desarrollados, en un equipo de unas 3 personas" />
+
+Los módulos digitalizaron procesos que antes se gestionaban a mano y centralizaron su información.
+
+## Aprendizajes
+
+Aprendí a desarrollar backend pensando no solo en que el código funcione, sino en cómo mantenerlo, integrarlo con bases de datos y adaptarlo a las necesidades del negocio.
+
+Hoy prestaría más atención desde el inicio a la arquitectura, las pruebas automatizadas y la documentación, para facilitar el crecimiento y el mantenimiento del sistema.

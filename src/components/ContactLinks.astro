@@ -1,0 +1,42 @@
+---
+import { profile } from '../data/profile';
+import Pending from './Pending.astro';
+const { email, linkedin, github } = profile.links;
+const items = [
+  { label: 'Email', href: email ? `mailto:${email}` : null, text: email },
+  { label: 'LinkedIn', href: linkedin, text: linkedin?.replace(/^https?:\/\/(www\.)?/, '') },
+  { label: 'GitHub', href: github, text: github?.replace(/^https?:\/\/(www\.)?/, '') },
+];
+---
+
+<dl class="contact">
+  {
+    items.map((i) => (
+      <div>
+        <dt class="label">{i.label}</dt>
+        <dd>{i.href ? <a href={i.href} rel={i.href.startsWith('http') ? 'me noopener' : undefined}>{i.text}</a> : <Pending what={i.label} />}</dd>
+      </div>
+    ))
+  }
+</dl>
+
+<style>
+  .contact {
+    display: grid;
+    gap: var(--space-3);
+  }
+  .contact div {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    align-items: baseline;
+    gap: var(--space-3);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--line);
+  }
+  dd {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 560;
+    overflow-wrap: anywhere;
+  }
+</style>
